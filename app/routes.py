@@ -6,6 +6,14 @@ import requests
 url = "https://google.serper.dev/search"
 main = Blueprint('main', __name__)
 
+@main.route('/', methods=['GET'])
+def index():
+    return jsonify({"message": "Welcome to the API"}), 200
+
+@main.route('/api', methods=['GET'])
+def api_root():
+    return jsonify({"message": "API Root"}), 200
+
 @main.route('/api/keygen', methods=['POST'])
 async def generate_keywords():
     if not request.is_json:
