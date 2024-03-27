@@ -21,15 +21,15 @@ function App() {
 
     switch (step) {
       case 1:
-        endpoint = 'api/keygen';
+        endpoint = '/api/keygen';
         data = { keyword: params.keyword, country: params.country, additional_keywords: params.additional_keywords };
         break;
       case 2:
-        endpoint = 'api/titlegen';
+        endpoint = '/api/titlegen';
         data = { param1: params.param1, param2: params.param2, param3: params.param3 };
         break;
       case 3:
-        endpoint = 'api/topicgen';
+        endpoint = '/api/topicgen';
         data = { param1: params.param1, param2: params.param2 };
         break;
       default:
