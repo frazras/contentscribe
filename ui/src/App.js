@@ -9,7 +9,7 @@ import axios from 'axios'; // Import axios for API calls
 function App() {
   const [currentStep, setCurrentStep] = useState(0);
   const [stepData, setStepData] = useState({});
-  const serverUrl = 'http://127.0.0.1:5000';
+  const serverUrl =  window.location.origin;
 
   // Set up axios defaults for CORS
   axios.defaults.baseURL = serverUrl;
