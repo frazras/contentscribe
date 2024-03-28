@@ -14,7 +14,7 @@ def index():
 def api_root():
     return jsonify({"message": "API Root"}), 200
 
-@main.route('/api/keygen', methods=['POST'])
+@main.route('/keygen', methods=['POST'])
 async def generate_keywords():
     if not request.is_json:
         return jsonify({"error": "Bad Request", "message": "The browser (or proxy) sent a request that this server could not understand."}), 400
@@ -40,7 +40,7 @@ async def generate_keywords():
     
     return jsonify(keyword_data)
 
-@main.route('/api/titlegen', methods=['POST'])
+@main.route('/titlegen', methods=['POST'])
 async def generate_title():
     if not request.is_json:
         return jsonify({"error": "Bad Request", "message": "The browser (or proxy) sent a request that this server could not understand."}), 400
@@ -65,4 +65,3 @@ async def generate_title():
 
     response = requests.request("POST", url, headers=headers, data=payload)
     results = response.json()
-
