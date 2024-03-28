@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import './App.css'; // This now imports Tailwind CSS
 import StepOne from './StepOne';
 import StepTwo from './StepTwo';
+import StepThree from './StepThree';
 import axios from 'axios'; // Import axios for API calls
 // Import other steps as needed
 
@@ -65,6 +66,7 @@ function App() {
         <div className="max-w-xl mx-auto p-8 bg-white border border-gray-300 rounded-lg shadow-lg text-left">
           {currentStep === 0 && <StepOne nextStep={nextStep} stepData={stepData} />}
           {currentStep === 1 && <StepTwo prevStep={prevStep} nextStep={nextStep} stepData={stepData} />}
+          {currentStep === 2 && <StepThree prevStep={prevStep} nextStep={nextStep} stepData={stepData} />}
           {/* Add additional steps here */}
         <div className="flex justify-center items-center mt-4">
           <div className="w-64 bg-gray-200 rounded-full">
