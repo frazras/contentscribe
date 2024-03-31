@@ -5,7 +5,7 @@ import asyncio
 
 MAX_RETRIES  = 5
 
-async def generate_response(user_prompt, model, open_ai_api_key):
+async def generate_response(user_prompt, model, open_ai_api_key, temperature=0.7):
     response = None
     async_openai_client = AsyncOpenAI(
             api_key=open_ai_api_key,
@@ -16,6 +16,7 @@ async def generate_response(user_prompt, model, open_ai_api_key):
             completion = await async_openai_client.chat.completions.create(
                 model=model,
                 messages=[{"role": "user", "content": user_prompt}],
+                temperature=temperature,
             )
             response = completion.choices[0].message.content
 

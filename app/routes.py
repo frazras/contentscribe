@@ -64,4 +64,33 @@ async def generate_title():
     }
 
     response = requests.request("POST", url, headers=headers, data=payload)
-    results = response.json()
+    
+    if response.status_code == 200:
+        results_data = response.json()
+        organic_results = results_data.get('organic', [])
+        extracted_data = []
+        for result in organic_results:
+            title = result.get('title')
+            position = result.get('position')
+            urllink = result.get('link')
+            extracted_data.append({'title': title, 'position': position, 'url': urllink})
+        results = {'results': extracted_data}
+    else:
+        results = {'error': 'Failed to fetch data', 'status_code': response.status_code}
+    return results; 
+
+@main.route('/serpscan', methods=['POST'])
+async def serp_scan():
+    if not request.is_json:
+        return jsonify({"error": "Bad Request", "message": "The browser (or proxy) sent a request that this server could not understand."}), 400
+    
+    data = request.json
+    keyword = data.get('keyword')
+    if not keyword:
+        return jsonify({"error": "Bad Request", "message": "Keyword is required."}), 400
+
+    country = data.get('country', 'US')
+    suggestions = await get_suggestions_for_query_async(keyword, country)
+
+    return jsonify({"success": True, "suggestions": suggestions})
+
