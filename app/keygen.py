@@ -10,27 +10,30 @@ LLM_MODEL = "gpt-4-turbo-preview"
 
 async def get_keyword_data(input_keyword, input_country,api_key,additional_keywords):
     # Get results
-    # keyword_data = await get_suggestion_keywords_google_optimized(
-    #     input_keyword, input_country
-    #  )
+    print("GETTTING KEY WORDS")
+
+    keyword_data = await get_suggestion_keywords_google_optimized(
+        input_keyword, input_country
+     )
     # # Print the keyword data
-    # print(keyword_data)
-    keyword_data = [
-        "who discovered tobago",
-        "what's tobago like",
-        "tobago what to do",
-        "how safe is tobago",
-        "how to pronounce tobago",
-        "top tobago hotels",
-        "are trinidad and tobago separate countries",
-        "are trinidad and tobago the same country",
-        "can trinidad and tobago purchase bitcoin",
-        "flights for tobago",
-        "tobago for holidays",
-        "visit trinidad or tobago",
-        "what to do in tobago for a day",
-        "cheap tobago hotels"
-    ]
+    print("GOT KEY WORDS")
+    print(keyword_data)
+    # keyword_data = [
+    #     "who discovered tobago",
+    #     "what's tobago like",
+    #     "tobago what to do",
+    #     "how safe is tobago",
+    #     "how to pronounce tobago",
+    #     "top tobago hotels",
+    #     "are trinidad and tobago separate countries",
+    #     "are trinidad and tobago the same country",
+    #     "can trinidad and tobago purchase bitcoin",
+    #     "flights for tobago",
+    #     "tobago for holidays",
+    #     "visit trinidad or tobago",
+    #     "what to do in tobago for a day",
+    #     "cheap tobago hotels"
+    # ]
     ai_report = await suggestions_ai_analysis(keyword_data,api_key)
     print(ai_report)
     # convert to json
@@ -51,6 +54,7 @@ async def get_keyword_data(input_keyword, input_country,api_key,additional_keywo
 
 async def suggestions_ai_analysis(keyword_data: str, api_key):
     max_retries = 5
+    print("ANALYZING KEY WORDS")
 
     for _ in range(max_retries):
         try:
@@ -58,8 +62,9 @@ async def suggestions_ai_analysis(keyword_data: str, api_key):
             prompt = keyword_aggregation.format(
                 KEYWORD_DATA=keyword_data
             )
+            print("awaiting Ai KEY WORDS")
 
-            return await generate_response(prompt, LLM_MODEL, api_key)
+            return await generate_response(prompt, LLM_MODEL, api_key,0)
 
         except Exception as e:
             print(
