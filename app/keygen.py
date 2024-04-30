@@ -5,16 +5,16 @@ import xml.etree.ElementTree as ET
 from bs4 import BeautifulSoup
 from .prompts import *
 from .llm import *
+import os
+from dotenv import load_dotenv
 
-#LLM_MODEL = "gpt-3.5-turbo-1106"
-LLM_MODEL = "gpt-4-turbo-preview"
-#LLM_MODEL = "mixtral-chat"
-#LLM_MODEL = "zephyr-chat"
-API_KEY = "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"
-#API_KEY = "j3VG5E00HofC5B851nsFJ993Ft4vZggI" #LEMONFOX
-BASE_URL = "https://api.openai.com/v1"
-#BASE_URL = "https://api.lemonfox.ai/v1"
+# Load environment variables from .env file
+load_dotenv()
 
+# Access variables securely
+LLM_MODEL = os.getenv('LLM_MODEL', 'gpt-4-turbo')  # Provide a default value if not set
+API_KEY = os.getenv('API_KEY')
+BASE_URL = os.getenv('BASE_URL', 'https://api.openai.com/v1')  # Provide a default value if not set
 
 async def get_keyword_data(input_keyword, input_country, additional_keywords):
     # Get results
@@ -37,26 +37,14 @@ async def get_keyword_data(input_keyword, input_country, additional_keywords):
     print("Got " + str(len(keyword_data)) + " cleaned keywords")
     print(json.dumps(keyword_data, indent=4))
     
-    # keyword_data = [
-    #     "who discovered tobago",
-    #     "what's tobago like",
-    #     "tobago what to do",
-    #     "how safe is tobago",
-    #     "how to pronounce tobago",
-    #     "top tobago hotels",
-    #     "are trinidad and tobago separate countries",
-    #     "are trinidad and tobago the same country",
-    #     "can trinidad and tobago purchase bitcoin",
-    #     "flights for tobago",
-    #     "tobago for holidays",
-    #     "visit trinidad or tobago",
-    #     "what to do in tobago for a day",
-    #     "cheap tobago hotels"
-    # ]
     ai_report = await suggestions_ai_analysis(keyword_data)
     print(ai_report)
     # convert to json
-    ai_report = json.loads(ai_report)
+    try:
+        ai_report = json.loads(ai_report)
+    except json.JSONDecodeError as e:
+        print(f"JSON decoding failed: {str(e)} - Response was: '{ai_report}'")
+        ai_report = {}
     # Preparing the result
     result = {
         "success": True,
@@ -108,8 +96,11 @@ async def suggestions_ai_analysis_headings(heading_data: str):
             # Generate response and directly parse JSON to avoid escaped text
             response = await generate_response(prompt, LLM_MODEL, API_KEY, BASE_URL, 0)
             if response:
-                return json.loads(response)  # Directly parse the JSON response to remove escaped text
-
+                try:
+                    return json.loads(response)  # Directly parse the JSON response to remove escaped text
+                except json.JSONDecodeError as e:
+                    print(f"JSON decoding failed: {str(e)} - Response was: '{response}'")
+                    return {}
         except Exception as e:
             print(
                 f"Failed to generate analysis for suggestion headings. Exception type: {type(e).__name__}, Message: {str(e)}"
@@ -147,8 +138,11 @@ async def title_gen_ai_analysis(context_data: str):
             if response:
                 print("RESPONSE")
                 print(response)
-                return json.loads(response)  # Directly parse the JSON response to remove escaped text
-
+                try:
+                    return json.loads(response)  # Directly parse the JSON response to remove escaped text
+                except json.JSONDecodeError as e:
+                    print(f"JSON decoding failed: {str(e)} - Response was: '{response}'")
+                    return {}
         except Exception as e:
             print(
                 f"Failed to generate analysis for suggestion ai titles. Exception type: {type(e).__name__}, Message: {str(e)}"
