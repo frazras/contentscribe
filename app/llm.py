@@ -5,10 +5,11 @@ import asyncio
 
 MAX_RETRIES  = 5
 
-async def generate_response(user_prompt, model, open_ai_api_key, temperature=0.7):
+async def generate_response(user_prompt, model, api_key, base_url="https://api.openai.com/v1", temperature=0.7):
     response = None
     async_openai_client = AsyncOpenAI(
-            api_key=open_ai_api_key,
+            api_key=api_key,
+            base_url=base_url
         )   
 
     for attempt in range(MAX_RETRIES):
