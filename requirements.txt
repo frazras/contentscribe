@@ -9,3 +9,5 @@ gunicorn==21.2.0
 packaging==24.0
 gevent==24.2.1
 beautifulsoup4==4.12.3
+python-dotenv==1.0.1
+
