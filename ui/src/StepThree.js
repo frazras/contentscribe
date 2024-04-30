@@ -1,19 +1,42 @@
 import React, { useState, useEffect } from 'react';
 
 function StepThree({ prevStep, nextStep, stepData }) {
+  const [selectedArticles, setSelectedArticles] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false); // Added state to track submission status
 
   useEffect(() => {
-    console.log('StepData on load:', stepData);
+    console.log('Serp Articles Stepdata on load:', stepData);
   }, [stepData]); // Include stepData in the dependency array
 
+  const handleSelectAll = () => {
+    const allArticles = stepData?.serp?.map(article => {
+      return {title: article.title, url: article.url}; // Changed 'position' to 'url' to match the expected structure
+    }) || [];
+    setSelectedArticles(allArticles);
+  };
+
+  const handleSelectNone = () => {
+    setSelectedArticles([]);
+  };
 
 
-
+  const handleArticleChange = (article) => {
+    const articleIndex = selectedArticles.findIndex(a => a.title === article.title);
+    if (articleIndex > -1) {
+      setSelectedArticles(selectedArticles.filter((_, index) => index !== articleIndex));
+    } else {
+      setSelectedArticles([...selectedArticles, article]);
+    }
+  };
+  
   const handleSubmit = async () => {
     setIsSubmitting(true); // Disable button and show spinner
-    await nextStep({ ...stepData });
-    //setIsSubmitting(false); // Re-enable button after submission
+    await nextStep({selected_articles: selectedArticles});
+    setIsSubmitting(false); // Re-enable button after submission
+  };
+  const handleBack = () => {
+    console.log('Back button clicked, attempting to move to previous step with current stepData:', JSON.stringify(stepData)); // Debugging line with JSON.stringify for better visibility in console
+    prevStep(stepData); // Passing stepData directly to prevStep function
   };
 
   return (
@@ -22,10 +45,39 @@ function StepThree({ prevStep, nextStep, stepData }) {
       <p className="mb-4">These articles are the best results for the topic. <br /> 
       Choose the articles you want to consider in the research process.</p>
       
+      <div className="flex justify-between mb-4">
+        <button
+          className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-700 transition-colors"
+          onClick={handleSelectAll}
+        >
+          Select All
+        </button>
+        <button
+          className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-700 transition-colors"
+          onClick={handleSelectNone}
+        >
+          Select None
+        </button>
+      </div>
+
+      <div className="overflow-y-scroll h-64 border border-gray-300 rounded px-4 py-2 mb-4">
+        {stepData?.serp ? stepData?.serp.map((result, index) => (
+          <label key={index} className="block">
+            <input
+              type="checkbox"
+              checked={selectedArticles.some(article => article.title === result.title)}
+              onChange={() => handleArticleChange({title: result.title, url: result.url})}
+              className="mr-2"
+            />
+            <small>{result.title }<br /><b>{new URL(result.url).hostname}</b></small>
+          </label>
+        )) : "No results found here"}
+      </div>
+
       <div className="flex justify-between mt-4">
         <button
           className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-700 transition-colors"
-          onClick={() => prevStep(stepData)}
+          onClick={handleBack}
         >
           Back
         </button>
@@ -43,7 +95,7 @@ function StepThree({ prevStep, nextStep, stepData }) {
               Processing...
             </div>
           ) : (
-            'Next: Review'
+            'Next: Review Headings'
           )}
         </button>
       </div>
@@ -52,3 +104,4 @@ function StepThree({ prevStep, nextStep, stepData }) {
 }
 
 export default StepThree;
+

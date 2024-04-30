@@ -29,17 +29,49 @@ Provide a list of 7-10 bullet-point suggestions on how to use these keywords, hi
 
 """
 
-keyword_aggregation = """
-For the following Keyword_data, create a comprehensive list of keywords by removing all duplicates,
-pluralizations, alternate ordering and phrasing of words or the same idea, grouping of related keywords
-(eg. 2yr old gifts, 3 yr old gifts, will become 2 and 3yr old gifts). 
-Ensure the new list maintains search intent and does not significantly change the word usage.
-Return the list of keywords as json in the form "keywords": [keyword1, keyword2, keyword3, ...] and sort by relevance to each other
-Use the Maximum character length in your response to return as many keywords as possible as valid json no explanation. 
-do not prefix the word json the result should be valid for the python function json.loads
+heading_aggregation = """
+For the following Heading_data, create a comprehensive list of headings by removing all duplicates, alternate ordering of the same words and phrasing of words or the same idea. 
+Ensure the new flat list maintains all the words in each heading.
+Return the list of headings as json in the form "headings": {{[heading1, heading2, heading3, ...]}} grouping relevant headings to each other(not alphabetically, but categorically eg, foods, cities, dates).
+You MUST return a single list of headings, no exceptions. Please prioritize the grouping of headings based on their relevance to each other.
+Do not duplicate or pad headings, you wil be harshly punished for returning duplicates. Valid Json must be returned as your response - no explanations, no notes.
+Anything except a valid json response will cause critical application failure, I'm sure you will be punished for that.
+Do not prefix the word json. The result should be valid for the python function json.loads, do not return truncated json.
+Do not use markdown, that will cause syntax errors in my code, return no more than 100 headings.
 
+[Heading_data]: {HEADING_DATA}
+
+"""
+
+keyword_aggregation = """
+
+For the following Keyword_data, create a comprehensive list of keywords by removing all duplicates,
+pluralizations, alternate ordering and phrasing of words or the same idea, grouping of related keywords.
+Ensure the new list maintains search intent and does not significantly change the word usage.
+Return the list of keywords as json in the form "keywords": {{[keyword1, keyword2, keyword3, ...]}} and sorted by relevance to each other
+but do not duplicate or pad keywords, you wil be harshly punished for returning duplicates. Valid Json must be returned as your response - no explanations, no notes.
+Anything except a valid json response will cause critical application failure, I'm sure you will be punished for that.
+Do not prefix the word json. The result should be valid for the python function json.loads, do not return truncated json.
+Do not use markdown, that will cause syntax errors in my code, return no more than 100 keywords.
 
 [Keyword_data]: {KEYWORD_DATA}
+
+
+"""
+
+title_gen = """
+* Given the following main keyword {INPUT_KEYWORD} and supporting keywords {SELECTED_KEYWORDS}, generate 25 creative and catchy article title suggestions, the 15 first titles should include a number at the beginning. 
+The titles should incorporate best practices for engaging and traffic-driving headlines, including the use of numbers, 
+clarity, direct address to the reader, and emotional or power words. The main keyword should be prominently featured in all titles. Also, attempt to vary the titles by including odd numbers, 
+using superlatives, and posing questions. Reflect on incorporating the principles shared by Brandon Gaille, ensuring the titles are concise, 
+clear, and tailored to potentially improve Google rankings and social shares.
+The current top ranking articles in google use the titles {SELECTED_ARTICLES} and the headings {SELECTED_HEADINGS}. 
+Take these titles and headings and incorporate them into your suggestions.
+The response should be a json in the form "titles": {{[title1, title2, title3, ...]}} and no explanations or notes.
+Anything except a valid json response will cause critical application failure, I'm sure you will be punished for that.
+Do not prefix the word json. The result should be valid for the python function json.loads, do not return truncated json.
+Do not use markdown, that will cause syntax errors in my code, return no more than 100 keywords.
+
 
 """
 

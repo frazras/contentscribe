@@ -1,38 +1,35 @@
 import React, { useState, useEffect } from 'react';
 
-function StepTwo({ prevStep, nextStep, stepData }) {
-  const [selectedKeywords, setSelectedKeywords] = useState([]);
+function StepFour({ prevStep, nextStep, stepData }) {
+  const [selectedHeadings, setSelectedHeadings] = useState([]); // Corrected state variable name
   const [isSubmitting, setIsSubmitting] = useState(false); // Added state to track submission status
 
   useEffect(() => {
-    console.log('Keywords StepData on load:', stepData);
+    console.log('Headings Stepdata on load:', stepData)
   }, [stepData]); // Include stepData in the dependency array
 
   const handleSelectAll = () => {
-    const keywords = stepData?.keywords || [];
-    setSelectedKeywords(keywords);
+    const allHeadings = stepData?.headings || [];
+    setSelectedHeadings(allHeadings);
   };
 
   const handleSelectNone = () => {
-    setSelectedKeywords([]);
+    setSelectedHeadings([]);
   };
 
-  const handleKeywordChange = (keyword) => {
-    if (selectedKeywords.includes(keyword)) {
-      setSelectedKeywords(selectedKeywords.filter(k => k !== keyword));
+  const handleHeadingChange = (heading) => {
+    if (selectedHeadings.includes(heading)) {
+      setSelectedHeadings(selectedHeadings.filter(h => h !== heading));
     } else {
-      setSelectedKeywords([...selectedKeywords, keyword]);
+      setSelectedHeadings([...selectedHeadings, heading]);
     }
   };
-
+  
   const handleSubmit = async () => {
     setIsSubmitting(true); // Disable button and show spinner
-    console.log("submitting start");
-    await nextStep({ selected_keywords: selectedKeywords });
-    setIsSubmitting(false); // Re-enable button and hide spinner
-    console.log("submitting done");
+    await nextStep({selected_headings: selectedHeadings});
+    setIsSubmitting(false); // Re-enable button after submission
   };
-
   const handleBack = () => {
     console.log('Back button clicked, attempting to move to previous step with current stepData:', JSON.stringify(stepData)); // Debugging line with JSON.stringify for better visibility in console
     prevStep(stepData); // Passing stepData directly to prevStep function
@@ -40,8 +37,10 @@ function StepTwo({ prevStep, nextStep, stepData }) {
 
   return (
     <div>
-      <h2 className="text-lg font-semibold mb-4">Select your Keywords</h2>
-      <p className="mb-4">Choose relevant keywords to enhance your content's visibility.</p>
+      <h2 className="text-lg font-semibold mb-4">Select headings for Article Structure</h2>
+      <p className="mb-4">These headings are used in top top ranking articles for the topic. <br /> 
+      Choose the headings you want to consider in creating your article.</p>
+      
       <div className="flex justify-between mb-4">
         <button
           className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-700 transition-colors"
@@ -57,18 +56,18 @@ function StepTwo({ prevStep, nextStep, stepData }) {
         </button>
       </div>
 
-      <div className="overflow-y-scroll h-64 border border-gray-300 rounded px-4 py-2">
-        {stepData?.keywords ? stepData.keywords.map((keyword, index) => (
+      <div className="overflow-y-scroll h-64 border border-gray-300 rounded px-4 py-2 mb-4">
+        {stepData?.headings ? stepData.headings.map((heading, index) => (
           <label key={index} className="block">
             <input
               type="checkbox"
-              checked={selectedKeywords.includes(keyword)}
-              onChange={() => handleKeywordChange(keyword)}
+              checked={selectedHeadings.includes(heading)}
+              onChange={() => handleHeadingChange(heading)}
               className="mr-2"
             />
-            {keyword}
+            {heading}
           </label>
-        )) : "No keywords found"}
+        )) : "No headings found"}
       </div>
 
       <div className="flex justify-between mt-4">
@@ -92,7 +91,7 @@ function StepTwo({ prevStep, nextStep, stepData }) {
               Processing...
             </div>
           ) : (
-            'Review Search Results'
+            'Next: Generate Titles'
           )}
         </button>
       </div>
@@ -100,5 +99,4 @@ function StepTwo({ prevStep, nextStep, stepData }) {
   );
 }
 
-export default StepTwo;
-
+export default StepFour;

@@ -1,19 +1,19 @@
 import React, { useState } from 'react';
 
 function StepOne({ nextStep, stepData }) {
-  const [keyword, setKeyword] = useState('');
+  const [inputKeyword, setInputKeyword] = useState('Time to Travel to Jamaica');
   const [additionalKeywords, setAdditionalKeywords] = useState([]);
   const [showTextArea, setShowTextArea] = useState(false);
-  const [isKeywordValid, setIsKeywordValid] = useState(true);
+  const [isInputKeywordValid, setIsInputKeywordValid] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false); // Added state to track submission status
 
   const handleCheckboxChange = () => {
     setShowTextArea(!showTextArea);
   };
 
-  const handleKeywordChange = (event) => {
-    setKeyword(event.target.value);
-    setIsKeywordValid(!!event.target.value.trim());
+  const handleInputKeywordChange = (event) => {
+    setInputKeyword(event.target.value);
+    setIsInputKeywordValid(!!event.target.value.trim());
   };
 
   const handleAdditionalKeywordsChange = (event) => {
@@ -21,13 +21,13 @@ function StepOne({ nextStep, stepData }) {
   };
 
   const handleSubmit = async () => {
-    if (!keyword.trim()) {
-      setIsKeywordValid(false);
+    if (!inputKeyword.trim()) {
+      setIsInputKeywordValid(false);
       return;
     }
-    
     setIsSubmitting(true); // Disable button and show spinner
-    await nextStep({ keyword, country: 'US', additional_keywords: JSON.stringify(additionalKeywords) });
+    nextStep({ input_keyword: inputKeyword, country: 'US', additional_keywords: JSON.stringify(additionalKeywords) });
+    //setIsSubmitting(false); // Re-enable button and hide spinner
   };
 
   return (
@@ -36,12 +36,12 @@ function StepOne({ nextStep, stepData }) {
       <p className="mb-4">Enter your main keyword phrase, this is the general topic of your article. <br/><span className='text-sm text-gray-500'>eg: Toys for Golden Retriever, Camping in Winter, Solo Traveller Vacation. </span></p>
       <input
         type="text"
-        value={keyword}
-        onChange={handleKeywordChange}
+        value={inputKeyword}
+        onChange={handleInputKeywordChange}
         placeholder="Enter your keyword here..."
-        className={`mt-2 px-4 py-2 border ${isKeywordValid ? 'border-gray-300' : 'border-red-500'} rounded w-full`}
+        className={`mt-2 px-4 py-2 border ${isInputKeywordValid ? 'border-gray-300' : 'border-red-500'} rounded w-full`}
       />
-      {!isKeywordValid && <p className="text-red-500 text-xs mt-1">Keyword is required.</p>}
+      {!isInputKeywordValid && <p className="text-red-500 text-xs mt-1">Keyword is required.</p>}
       <div className="mt-4">
         <label className="inline-flex items-center">
           <input
