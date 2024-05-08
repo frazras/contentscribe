@@ -89,12 +89,16 @@ function App() {
         });
         let response = await axios.post(endpoint, globalData.current);
         // Append contents of response.data.results to globalData.current with its own key
+        if(response.data.results) {
         Object.entries(response.data.results).forEach(([key, value]) => {
           globalData.current[key] = value;
         });
         setStepData(response.data.results);
         console.log("response", response);
-
+        } else {
+          console.log("No results found");
+          console.log("response", response);
+        }
 
 
       } catch (error) {

@@ -2,13 +2,30 @@ from flask import Blueprint, request, jsonify
 import json
 from .keygen import get_keyword_data, combine_headings, title_gen_ai_analysis
 import requests
+from dramatiq.brokers.redis import RedisBroker
+from dramatiq import actor
+from dramatiq.results import Results
+from dramatiq.results.backends import RedisBackend
+import dramatiq
+from dramatiq.middleware import Middleware, AsyncIO
+import time
+
+# Setup Redis broker
+redis_broker = RedisBroker(host="localhost", port=6379)
+
+# Add AsyncIO middleware
+redis_broker.add_middleware(AsyncIO())
+
+# Set the broker for Dramatiq
+dramatiq.set_broker(redis_broker)
 
 url = "https://google.serper.dev/search"
 main = Blueprint('main', __name__)
 
 @main.route('/', methods=['GET'])
 def index():
-    return jsonify({"message": "Welcome to the API"}), 200
+    task = wait_and_return_hello.send()
+    return jsonify({"task_id_d": task.message_id}), 202
 
 @main.route('/api', methods=['GET'])
 def api_root():
@@ -16,29 +33,29 @@ def api_root():
 
 @main.route('/keygen', methods=['POST'])
 async def generate_keywords():
+    print("GOT REQUEST")
     if not request.is_json:
         return jsonify({"error": "Bad Request", "message": "The browser (or proxy) sent a request that this server could not understand."}), 400
-    
+    print("GOT JSON")
     data = request.json
     input_keyword = data.get('input_keyword')
     if not input_keyword:
         return jsonify({"error": "Bad Request", "message": "Keyword is required."}), 400
-    
+    print("GOT KEYWORD")
     country = data.get('country', 'US')
     
     # Attempt to load additional_keywords safely
     additional_keywords_str = data.get('additional_keywords', '[]')
     try:
+        print("GOT ADDITIONAL KEYWORDS")
         additional_keywords = json.loads(additional_keywords_str)
     except json.JSONDecodeError:
         return jsonify({"error": "Bad Request", "message": "Invalid JSON format for additional_keywords."}), 400
     
-    try:
-        keyword_data = await get_keyword_data(input_keyword, country,additional_keywords)
-    except Exception as e:
-        return jsonify({"error": "Server Error", "message": str(e)}), 500
-    
-    return jsonify(keyword_data)
+    print("SENDING TASK")
+    task = get_keyword_data.send(input_keyword, country, additional_keywords)
+    print("TASK SENT")
+    return jsonify({"task_id": task.message_id}), 202
 
 @main.route('/serpscrape', methods=['POST'])
 async def generate_title():
@@ -49,8 +66,6 @@ async def generate_title():
     data = request.json
     print(data)
     input_keyword = data.get('input_keyword')
-    # additional_keywords = data.get('additional_keywords', []);
-    # ai_report = data.get('ai_report', '');
     if not input_keyword:
         print("No input_keyword")
         return jsonify({"error": "Bad Request", "message": "Keyword is required."}), 400
@@ -124,3 +139,17 @@ async def new_title_gen():
     print(titles)
     return jsonify({"success": True, "results": titles})
 
+@main.route('/keygen_status/<task_id>', methods=['GET'])
+def get_task_status(task_id):
+    task_result = results.get_result(task_id)
+    result = {
+        'state': task_result.state,
+        'result': task_result.result
+    }
+    return jsonify(result), 200
+
+@dramatiq.actor
+def wait_and_return_hello():
+    time.sleep(5)
+    print("IT WORKS!! Hello world after 5 seconds!")
+    return "hello world"

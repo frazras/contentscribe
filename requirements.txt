@@ -10,4 +10,7 @@ packaging==24.0
 gevent==24.2.1
 beautifulsoup4==4.12.3
 python-dotenv==1.0.1
+dramatiq[watch]==1.16.0
+aioredis==2.0.1
+supabase==2.4.5
 

@@ -3,10 +3,15 @@ import requests
 import httpx
 import xml.etree.ElementTree as ET
 from bs4 import BeautifulSoup
+import supabase
 from .prompts import *
 from .llm import *
 import os
 from dotenv import load_dotenv
+import dramatiq
+from dramatiq.brokers.redis import RedisBroker
+from dramatiq.middleware import CurrentMessage
+
 
 # Load environment variables from .env file
 load_dotenv()
@@ -16,6 +21,11 @@ LLM_MODEL = os.getenv('LLM_MODEL', 'gpt-4-turbo')  # Provide a default value if 
 API_KEY = os.getenv('API_KEY')
 BASE_URL = os.getenv('BASE_URL', 'https://api.openai.com/v1')  # Provide a default value if not set
 
+# Setup Redis broker for Dramatiq
+redis_broker = RedisBroker(host="localhost", port=6379)
+dramatiq.set_broker(redis_broker)
+
+@dramatiq.actor
 async def get_keyword_data(input_keyword, input_country, additional_keywords):
     # Get results
     print("GETTTING KEY WORDS")
@@ -46,12 +56,17 @@ async def get_keyword_data(input_keyword, input_country, additional_keywords):
         print(f"JSON decoding failed: {str(e)} - Response was: '{ai_report}'")
         ai_report = {}
     # Preparing the result
+    message = CurrentMessage.get_current_message()
     result = {
         "success": True,
         "results": ai_report,
-    }
-
-    
+        "task_id": message.message_id  # Include the task ID using Dramatiq's get_current_message
+    }    # Store result in Supabase
+    response = supabase.table("results").insert(result).execute()
+    if response.error:
+        print(f"Failed to store data in Supabase: {response.error}")
+    else:
+        print("Data stored successfully in Supabase")
 
     return result
 
