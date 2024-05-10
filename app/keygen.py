@@ -155,20 +155,20 @@ async def get_suggestion_keywords_google_optimized(query, countryCode):
     # Define categorization keywords for all categories
             categories = {
                 "Questions": ["who", "what", "where", "when", "why", "how", "are"],
-                "Prepositions": ["can", "with", "for", "of", "about", "before", "after"],
+                # "Prepositions": ["can", "with", "for", "of", "about", "before", "after"],
                 "Alphabet": list("abcdefghijklmnopqrstuvwxyz"),
                 "Numbers": list("1234567890"),
-                "Comparisons": ["vs", "versus", "or", "comparison", "alternative"],
-                "Intent-Based": ["buy", "review", "price", "best", "top", "how to", "why to"],
-                "Time-Related": ["when", "schedule", "deadline", "today", "now", "latest"],
-                "Audience-Specific": ["for beginners", "for small businesses", "for students", "for professionals"],
-                "Problem-Solving": ["solution", "issue", "error", "troubleshoot", "fix"],
-                "Feature-Specific": ["with video", "with images", "analytics", "tools", "with example"],
-                "Opinions/Reviews": ["review", "opinion", "rating", "feedback", "testimonial"],
-                "Cost-Related": ["price", "cost", "budget", "cheap", "expensive", "value"],
-                "Trend-Based": ["trends", "new", "upcoming"],
-                "Location-Based": ["near me", "local", "in my area", "in my city", "in my country", "near"],
-                "Year-Based": ["2022", "2023", "2024", "2025"]
+                # "Comparisons": ["vs", "versus", "or", "comparison", "alternative"],
+                # "Intent-Based": ["buy", "review", "price", "best", "top", "how to", "why to"],
+                # "Time-Related": ["when", "schedule", "deadline", "today", "now", "latest"],
+                # "Audience-Specific": ["for beginners", "for small businesses", "for students", "for professionals"],
+                # "Problem-Solving": ["solution", "issue", "error", "troubleshoot", "fix"],
+                # "Feature-Specific": ["with video", "with images", "analytics", "tools", "with example"],
+                # "Opinions/Reviews": ["review", "opinion", "rating", "feedback", "testimonial"],
+                # "Cost-Related": ["price", "cost", "budget", "cheap", "expensive", "value"],
+                # "Trend-Based": ["trends", "new", "upcoming"],
+                # "Location-Based": ["near me", "local", "in my area", "in my city", "in my country", "near"],
+                # "Year-Based": ["2022", "2023", "2024", "2025"]
             }
 
             categorized_suggestions = {key: {} for key in categories.keys()}
