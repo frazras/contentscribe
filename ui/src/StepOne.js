@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 function StepOne({ nextStep, stepData }) {
-  const [inputKeyword, setInputKeyword] = useState('Time to Travel to Jamaica');
+  const [inputKeyword, setInputKeyword] = useState('Best Time to Travel to Jamaica');
   const [additionalKeywords, setAdditionalKeywords] = useState([]);
   const [showTextArea, setShowTextArea] = useState(false);
   const [isInputKeywordValid, setIsInputKeywordValid] = useState(true);
