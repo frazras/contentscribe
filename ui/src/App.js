@@ -129,11 +129,6 @@ function App() {
           {currentStep === 3 && <StepFour prevStep={prevStep} nextStep={nextStep} stepData={stepData} />}
           {currentStep === 4 && <StepFive prevStep={prevStep} nextStep={nextStep} stepData={stepData} />}
           {/* Add additional steps here */}
-        <div className="flex justify-center items-center mt-4">
-          <div className="w-64 bg-gray-200 rounded-full">
-            <div className={`w-${currentStep * 33}% h-2 bg-blue-500 rounded-full`}></div>
-          </div>
-        </div>
         </div>
       </div>
     </div>
