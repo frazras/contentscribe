@@ -1,24 +1,12 @@
 import React, { useState, useEffect } from 'react';
 
-function StepThree({ prevStep, nextStep, stepData }) {
+function StepThree({ nextStep, stepData }) {
   const [selectedArticles, setSelectedArticles] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false); // Added state to track submission status
 
   useEffect(() => {
     console.log('Serp Articles Stepdata on load:', stepData);
   }, [stepData]); // Include stepData in the dependency array
-
-  const handleSelectAll = () => {
-    const allArticles = stepData?.serp?.map(article => {
-      return {title: article.title, url: article.url}; // Changed 'position' to 'url' to match the expected structure
-    }) || [];
-    setSelectedArticles(allArticles);
-  };
-
-  const handleSelectNone = () => {
-    setSelectedArticles([]);
-  };
-
 
   const handleArticleChange = (article) => {
     const articleIndex = selectedArticles.findIndex(a => a.title === article.title);
@@ -32,57 +20,33 @@ function StepThree({ prevStep, nextStep, stepData }) {
   const handleSubmit = async () => {
     setIsSubmitting(true); // Disable button and show spinner
     await nextStep({selected_articles: selectedArticles});
-    setIsSubmitting(false); // Re-enable button after submission
-  };
-  const handleBack = () => {
-    console.log('Back button clicked, attempting to move to previous step with current stepData:', JSON.stringify(stepData)); // Debugging line with JSON.stringify for better visibility in console
-    prevStep(stepData); // Passing stepData directly to prevStep function
   };
 
   return (
     <div>
       <h2 className="text-lg font-semibold mb-4">Research Similar Articles</h2>
-      <p className="mb-4">These articles are the best results for the topic. <br /> 
+      <p className="mb-4">These articles are the best search results for the topic. <br /> 
       Choose the articles you want to consider in the research process.</p>
       
-      <div className="flex justify-between mb-4">
-        <button
-          className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-700 transition-colors"
-          onClick={handleSelectAll}
-        >
-          Select All
-        </button>
-        <button
-          className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-700 transition-colors"
-          onClick={handleSelectNone}
-        >
-          Select None
-        </button>
-      </div>
-
       <div className="overflow-y-scroll h-64 border border-gray-300 rounded px-4 py-2 mb-4">
         {stepData?.serp ? stepData?.serp.map((result, index) => (
-          <label key={index} className="block">
-            <input
-              type="checkbox"
-              checked={selectedArticles.some(article => article.title === result.title)}
-              onChange={() => handleArticleChange({title: result.title, url: result.url})}
-              className="mr-2"
-            />
-            <small>{result.title }<br /><b>{new URL(result.url).hostname}</b></small>
-          </label>
+          <div key={index} className="mb-2 border-b border-gray-200 pb-2">
+            <label className="block">
+              <input
+                type="checkbox"
+                checked={selectedArticles.some(article => article.title === result.title)}
+                onChange={() => handleArticleChange({title: result.title, url: result.url})}
+                className="mr-2"
+              />
+              <small>{result.title }<br /><b>{new URL(result.url).hostname}</b></small>
+            </label>
+          </div>
         )) : "No results found here"}
       </div>
 
-      <div className="flex justify-between mt-4">
+      <div className="flex justify-end mt-4">
         <button
-          className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-700 transition-colors"
-          onClick={handleBack}
-        >
-          Back
-        </button>
-        <button
-          className={`px-4 py-2 ${isSubmitting ? 'bg-blue-300' : 'bg-blue-500 hover:bg-blue-700'} text-white rounded transition-colors`}
+          className={`px-4 py-2 ${isSubmitting ? 'bg-gray-500' : 'bg-blue-500 hover:bg-blue-700'} text-white rounded transition-colors`}
           onClick={handleSubmit}
           disabled={isSubmitting} // Disable button during submission
         >
@@ -94,9 +58,7 @@ function StepThree({ prevStep, nextStep, stepData }) {
               </svg>
               Processing...
             </div>
-          ) : (
-            'Next: Review Headings'
-          )}
+          ) :  'Review Headings'}
         </button>
       </div>
     </div>

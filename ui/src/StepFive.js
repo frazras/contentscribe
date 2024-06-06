@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-function StepFive({ prevStep, nextStep, stepData }) {
+function StepFive({ nextStep, stepData }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedTitle, setSelectedTitle] = useState('');
   const [customTitle, setCustomTitle] = useState('');
@@ -9,14 +9,6 @@ function StepFive({ prevStep, nextStep, stepData }) {
   useEffect(() => {
     console.log('Titles Stepdata on load:', stepData);
   }, [stepData]);
-
-  const handleSelectAll = () => {
-    setSelectedTitle('');
-  };
-
-  const handleSelectNone = () => {
-    setSelectedTitle('');
-  };
 
   const handleTitleChange = (title) => {
     setSelectedTitle(title);
@@ -35,21 +27,6 @@ function StepFive({ prevStep, nextStep, stepData }) {
       <p className="mb-4">These titles are suggested based on the topic and titles we found. <br /> 
       Choose the Title that best suits your article or create a custom title below.</p>
       
-      <div className="flex justify-between mb-4">
-        <button
-          className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-700 transition-colors"
-          onClick={handleSelectAll}
-        >
-          Select All
-        </button>
-        <button
-          className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-700 transition-colors"
-          onClick={handleSelectNone}
-        >
-          Select None
-        </button>
-      </div>
-
       <div className="overflow-y-scroll h-64 border border-gray-300 rounded px-4 py-2 mb-4">
         {stepData?.titles ? stepData.titles.map((title, index) => (
           <label key={index} className="block">
@@ -94,13 +71,7 @@ function StepFive({ prevStep, nextStep, stepData }) {
         </div>
       )}
 
-      <div className="flex justify-between mt-4">
-        <button
-          className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-700 transition-colors"
-          onClick={() => prevStep(stepData)}
-        >
-          Back
-        </button>
+      <div className="flex justify-end mt-4">
         <button
           className={`px-4 py-2 ${isSubmitting ? 'bg-blue-300' : 'bg-blue-500 hover:bg-blue-700'} text-white rounded transition-colors`}
           onClick={handleSubmit}

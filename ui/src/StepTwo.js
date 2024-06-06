@@ -1,21 +1,12 @@
 import React, { useState, useEffect } from 'react';
 
-function StepTwo({ prevStep, nextStep, stepData }) {
+function StepTwo({ nextStep, stepData }) {
   const [selectedKeywords, setSelectedKeywords] = useState([]);
-  const [isSubmitting, setIsSubmitting] = useState(false); // Added state to track submission status
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     console.log('Keywords StepData on load:', stepData);
-  }, [stepData]); // Include stepData in the dependency array
-
-  const handleSelectAll = () => {
-    const keywords = stepData?.keywords || [];
-    setSelectedKeywords(keywords);
-  };
-
-  const handleSelectNone = () => {
-    setSelectedKeywords([]);
-  };
+  }, [stepData]);
 
   const handleKeywordChange = (keyword) => {
     if (selectedKeywords.includes(keyword)) {
@@ -26,36 +17,19 @@ function StepTwo({ prevStep, nextStep, stepData }) {
   };
 
   const handleSubmit = async () => {
-    setIsSubmitting(true); // Disable button and show spinner
-    console.log("submitting start");
+    if (selectedKeywords.length === 0) {
+      alert("Please select at least one keyword.");
+      return;
+    }
+    setIsSubmitting(true);
     await nextStep({ selected_keywords: selectedKeywords });
-    setIsSubmitting(false); // Re-enable button and hide spinner
-    console.log("submitting done");
-  };
-
-  const handleBack = () => {
-    console.log('Back button clicked, attempting to move to previous step with current stepData:', JSON.stringify(stepData)); // Debugging line with JSON.stringify for better visibility in console
-    prevStep(stepData); // Passing stepData directly to prevStep function
+  
   };
 
   return (
     <div>
       <h2 className="text-lg font-semibold mb-4">Select your Keywords</h2>
       <p className="mb-4">Choose relevant keywords to enhance your content's visibility.</p>
-      <div className="flex justify-between mb-4">
-        <button
-          className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-700 transition-colors"
-          onClick={handleSelectAll}
-        >
-          Select All
-        </button>
-        <button
-          className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-700 transition-colors"
-          onClick={handleSelectNone}
-        >
-          Select None
-        </button>
-      </div>
 
       <div className="overflow-y-scroll h-64 border border-gray-300 rounded px-4 py-2">
         {stepData?.keywords ? stepData.keywords.map((keyword, index) => (
@@ -71,17 +45,11 @@ function StepTwo({ prevStep, nextStep, stepData }) {
         )) : "No keywords found"}
       </div>
 
-      <div className="flex justify-between mt-4">
+      <div className="flex justify-end mt-4">
         <button
-          className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-700 transition-colors"
-          onClick={handleBack}
-        >
-          Back
-        </button>
-        <button
-          className={`px-4 py-2 ${isSubmitting ? 'bg-blue-300' : 'bg-blue-500 hover:bg-blue-700'} text-white rounded transition-colors`}
+          className={`px-4 py-2 ${isSubmitting ? 'bg-gray-500' : 'bg-blue-500 hover:bg-blue-700'} text-white rounded transition-colors`}
           onClick={handleSubmit}
-          disabled={isSubmitting} // Disable button during submission
+          disabled={isSubmitting}
         >
           {isSubmitting ? (
             <div className="flex items-center justify-center">
@@ -91,9 +59,7 @@ function StepTwo({ prevStep, nextStep, stepData }) {
               </svg>
               Processing...
             </div>
-          ) : (
-            'Review Search Results'
-          )}
+          ) : 'Review Search Results'}
         </button>
       </div>
     </div>
