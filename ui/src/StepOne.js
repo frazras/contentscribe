@@ -100,7 +100,10 @@ function StepOne({ nextStep, stepData }) {
       {isSubmitting && (
         <>
           <div className="pbar mt-5">
-            <div className="progress-bar">{bars}{progress}%</div> </div>
+            <div className="progress-bar">
+            <div className="bg-blue-500 h-5 px-2 mt-1 flex justify-end rounded-full" style={{ width: `${progress}%` }}>{progress}%</div>
+            </div>
+           </div>
           <div className="text-center mt-2">{renderProgressMessage()}</div>
         </>
       )}
