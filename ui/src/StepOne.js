@@ -43,7 +43,7 @@ function StepOne({ nextStep, stepData }) {
           setBars("░".repeat(41)); // Assuming 41 bars represent 100%
           console.log("progress complete");
         } else if (newProgress % 5 === 0) {
-          setBars((prevBars) => prevBars + "░");
+          setBars((prevBars) => prevBars + "░░");
           console.log("progress", newProgress)
         }
         return newProgress;
