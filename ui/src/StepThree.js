@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 function StepThree({ nextStep, stepData }) {
   const [selectedArticles, setSelectedArticles] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false); // Added state to track submission status
+  const [validationError, setValidationError] = useState(false); // State to handle validation error
 
   useEffect(() => {
     console.log('Serp Articles Stepdata on load:', stepData);
@@ -15,9 +16,16 @@ function StepThree({ nextStep, stepData }) {
     } else {
       setSelectedArticles([...selectedArticles, article]);
     }
+    if (selectedArticles.length > 0) {
+      setValidationError(false); // Reset validation error if there are selected articles
+    }
   };
   
   const handleSubmit = async () => {
+    if (selectedArticles.length === 0) {
+      setValidationError(true); // Set validation error if no articles are selected
+      return;
+    }
     setIsSubmitting(true); // Disable button and show spinner
     await nextStep({selected_articles: selectedArticles});
   };
@@ -43,6 +51,7 @@ function StepThree({ nextStep, stepData }) {
           </div>
         )) : "No results found here"}
       </div>
+      {validationError && <p className="text-red-500 text-sm mt-1 font-bold">Please select at least one article.</p>}
 
       <div className="flex justify-end mt-4">
         <button

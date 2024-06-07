@@ -32,7 +32,7 @@ function StepOne({ nextStep, stepData }) {
     } else if (wordCount <= 4) {
       intervalDuration = 60000 / 100; // 1 minute
     } else {
-      intervalDuration = 35000 / 100; // 35 seconds
+      intervalDuration = 30000 / 100; // 30xx  seconds
     }
 
     progressInterval.current = setInterval(() => {
@@ -101,7 +101,9 @@ function StepOne({ nextStep, stepData }) {
         <>
           <div className="pbar mt-5">
             <div className="progress-bar">
-            <div className="bg-blue-500 h-5 px-2 mt-1 flex justify-end rounded-full" style={{ width: `${progress}%` }}>{progress}%</div>
+            <div className="bg-blue-500 h-1" style={{ width: `${progress}%` }}></div>
+              {bars}{progress}%
+              
             </div>
            </div>
           <div className="text-center mt-2">{renderProgressMessage()}</div>

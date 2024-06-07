@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 function StepTwo({ nextStep, stepData }) {
   const [selectedKeywords, setSelectedKeywords] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [validationError, setValidationError] = useState(false); // Added state to handle validation error
 
   useEffect(() => {
     console.log('Keywords StepData on load:', stepData);
@@ -18,12 +19,11 @@ function StepTwo({ nextStep, stepData }) {
 
   const handleSubmit = async () => {
     if (selectedKeywords.length === 0) {
-      alert("Please select at least one keyword.");
+      setValidationError(true); // Set validation error if no keywords are selected
       return;
     }
     setIsSubmitting(true);
     await nextStep({ selected_keywords: selectedKeywords });
-  
   };
 
   return (
@@ -44,6 +44,7 @@ function StepTwo({ nextStep, stepData }) {
           </label>
         )) : "No keywords found"}
       </div>
+      {validationError && <p className="text-red-500 text-sm mt-1 font-bold">Please select at least one keyword.</p>}
 
       <div className="flex justify-end mt-4">
         <button
