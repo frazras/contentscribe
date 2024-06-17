@@ -158,9 +158,10 @@ async def outline_gen_ai_analysis(context_data: str):
     selected_keywords = context_data.get('selected_keywords')
     title = context_data.get('title')
     input_keyword = context_data.get('input_keyword')
-
+    print("retrieved variables")
     for _ in range(max_retries):
         try:
+            print("formatting prompt")
             # Prepare the prompt with heading data
             prompt = outline_gen.format(
                 INPUT_KEYWORD=input_keyword,
