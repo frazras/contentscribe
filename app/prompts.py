@@ -52,7 +52,7 @@ Return the list of keywords as json in the form "keywords": {{[keyword1, keyword
 but do not duplicate or pad keywords, you wil be harshly punished for returning duplicates. Valid Json must be returned as your response - no explanations, no notes.
 Anything except a valid json response will cause critical application failure, I'm sure you will be punished for that.
 Do not prefix the word json. The result should be valid for the python function json.loads, do not return truncated json.
-Do not use markdown, that will cause syntax errors in my code, return no more than 100 keywords.
+Do not use markdown, do not use the markdown syntax ```json, that will cause syntax errors in my code, return no more than 100 keywords.
 
 [Keyword_data]: {KEYWORD_DATA}
 
@@ -97,6 +97,6 @@ If necessary, add multiple subheadings to improve the information hierarchy.
 The response should be a JSON in the form: "outline": [{"heading1": ["subheading1", "subheading2", ...]}, {"heading2": ["subheading3", "subheading4", ...]}, ...]. 
 No explanations or notes should be included.
 
-Ensure the response is valid JSON and does not include markdown, to prevent syntax errors in the code.
+Ensure the response is valid JSON and does not include markdown, do not use the markdown syntax ```json or else I will get syntax errors in the code.
 """
 
