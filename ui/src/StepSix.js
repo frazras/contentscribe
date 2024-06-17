@@ -97,7 +97,7 @@ function StepSix({ nextStep, stepData }) {
   return (
     <DndProvider backend={HTML5Backend}>
       <div>
-        <h2 className="text-lg font-semibold mb-4">Outline Editor</h2>
+        <h2 className="text-lg font-semibold mb-4">Article Outline Editor</h2>
         <p className="mb-4">Edit the outline sections below:</p>
 
         <div className="space-y-4">
