@@ -150,6 +150,43 @@ async def title_gen_ai_analysis(context_data: str):
 
     return {}
 
+async def outline_gen_ai_analysis(context_data: str):
+    max_retries = 5
+    print("ANALYZING data for outline gen")
+    selected_articles = [article['title'] for article in context_data.get('selected_articles')]
+    selected_headings = context_data.get('selected_headings')
+    selected_keywords = context_data.get('selected_keywords')
+    title = context_data.get('title')
+    input_keyword = context_data.get('input_keyword')
+
+    for _ in range(max_retries):
+        try:
+            # Prepare the prompt with heading data
+            prompt = outline_gen.format(
+                INPUT_KEYWORD=input_keyword,
+                SELECTED_ARTICLES=selected_articles,
+                SELECTED_HEADINGS=selected_headings,
+                SELECTED_KEYWORDS=selected_keywords,
+                TITLE=title
+            )
+            print("awaiting Ai OUTLINE")
+            print(prompt)
+            #pint newline
+            print("\n")
+            response = await generate_response(prompt, LLM_MODEL, API_KEY, BASE_URL, 0)
+            if response:
+                print("RESPONSE")
+                print(response)
+                try:
+                    return json.loads(response)  # Directly parse the JSON response to remove escaped text
+                except json.JSONDecodeError as e:
+                    print(f"JSON decoding failed: {str(e)} - Response was: '{response}'")
+                    return {}
+        except Exception as e:
+            print(
+                f"Failed to generate analysis for suggestion ai outline. Exception type: {type(e).__name__}, Message: {str(e)}"
+            )
+    return {}
 
 async def get_suggestion_keywords_google_optimized(query, countryCode):
     # Define categorization keywords for all categories

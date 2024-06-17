@@ -6,11 +6,76 @@ import StepTwo from './StepTwo';
 import StepThree from './StepThree';
 import StepFour from './StepFour';
 import StepFive from './StepFive';
+import StepSix from './StepSix';
 import axios from 'axios'; // Import axios for API calls
 // Import other steps as needed
 
 function App() {
   const [currentStep, setCurrentStep] = useState(0);
+  const state = {
+    "outline": [
+      {
+        "Discover the Best Time to Travel to Jamaica": [
+          "Unlocking Jamaica's Seasonal Secrets",
+          "A Month-by-Month Guide to Jamaica's Weather and Events"
+        ]
+      },
+      {
+        "Jamaica's Weather Wonderland": [
+          "What is Hurricane Season in Jamaica?",
+          "The Sun-Soaked Days: Best Time for Weather in Jamaica"
+        ]
+      },
+      {
+        "Budget-Friendly Travel to Jamaica": [
+          "Cheapest Time to Go to Jamaica",
+          "Cheapest Month to Fly to Jamaica",
+          "Saving on Sunshine: Cheapest Time to Go to Jamaica All-Inclusive"
+        ]
+      },
+      {
+        "Exploring Jamaica's Gems": [
+          "Best Time to Visit Montego Bay Jamaica",
+          "Negril's Natural Beauty: Best Time to Visit",
+          "Ocho Rios: A Timing Guide for Visitors",
+          "Kingston Uncovered: Best Time to Visit",
+          "Luminous Lagoon: When to Witness Its Glow",
+          "South Coast Sojourns: Optimal Visit Times"
+        ]
+      },
+      {
+        "Special Moments in Jamaica": [
+          "Romantic Escapes: Best Time to Get Married in Jamaica",
+          "Fishing Adventures: Best Time to Go Fishing in Jamaica"
+        ]
+      },
+      {
+        "Cultural Celebrations and Avoiding Crowds": [
+          "Best Time to Visit Jamaica to Avoid Crowds",
+          "Festivals and Events: Timing Your Cultural Experience"
+        ]
+      },
+      {
+        "Travel Tips for UK and North American Travelers": [
+          "Best Time to Go to Jamaica from UK",
+          "Cheapest Time to Fly to Jamaica from Canada",
+          "US to Jamaica: Finding the Cheapest Time to Fly"
+        ]
+      },
+      {
+        "Maximizing Your Stay in Jamaica": [
+          "Is 4 Days Enough in Jamaica?",
+          "When Should You Not Go to Jamaica?",
+          "Is Jamaica Good to Visit in January?",
+          "What is the Off Season for Jamaica?"
+        ]
+      },
+      {
+        "Conclusion: Crafting Your Perfect Jamaican Getaway": []
+      }
+    ]
+  }
+  //const [stepData, setStepData] = useState(state);
   const [stepData, setStepData] = useState({});
   const serverUrl =  window.location.origin;
 
@@ -75,8 +140,11 @@ function App() {
           return;
         }
         break;
+      case 5:
+        endpoint = '/api/outlinegen';
+        break;
       default:
-        console.error('Invalid step');
+        console.error('Invalid step for callApiForStep', step);
         return;
     }
 
@@ -128,6 +196,7 @@ function App() {
           {currentStep === 2 && <StepThree prevStep={prevStep} nextStep={nextStep} stepData={stepData} />}
           {currentStep === 3 && <StepFour prevStep={prevStep} nextStep={nextStep} stepData={stepData} />}
           {currentStep === 4 && <StepFive prevStep={prevStep} nextStep={nextStep} stepData={stepData} />}
+          {currentStep === 5 && <StepSix prevStep={prevStep} nextStep={nextStep} stepData={stepData} />}
           {/* Add additional steps here */}
         </div>
       </div>

@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 import json
-from .keygen import get_keyword_data, combine_headings, title_gen_ai_analysis
+from .keygen import get_keyword_data, combine_headings, title_gen_ai_analysis, outline_gen_ai_analysis
 import requests
 
 url = "https://google.serper.dev/search"
@@ -123,4 +123,16 @@ async def new_title_gen():
     print("GOT TITLES")
     print(titles)
     return jsonify({"success": True, "results": titles})
+
+@main.route('/outlinegen', methods=['POST'])
+async def outline_gen():
+    if not request.is_json:
+        return jsonify({"error": "Bad Request", "message": "The browser (or proxy) sent a request that this server could not understand."}), 400
+    print("GOT REQUEST")
+    data = request.json
+    print("GOT DATA")
+    outline = await outline_gen_ai_analysis(data)
+    print("GOT OUTLINE")
+    print(outline)  
+    return jsonify({"success": True, "results": outline})
 

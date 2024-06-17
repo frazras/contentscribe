@@ -60,7 +60,7 @@ Do not use markdown, that will cause syntax errors in my code, return no more th
 """
 
 title_gen = """
-* Given the following main keyword {INPUT_KEYWORD} and supporting keywords {SELECTED_KEYWORDS}, generate 25 creative and catchy article title suggestions, the 15 first titles should include a number at the beginning. 
+Given the following main keyword {INPUT_KEYWORD} and supporting keywords {SELECTED_KEYWORDS}, generate 25 creative and catchy article title suggestions, the 15 first titles should include a number at the beginning. 
 The titles should incorporate best practices for engaging and traffic-driving headlines, including the use of numbers, 
 clarity, direct address to the reader, and emotional or power words. The main keyword should be prominently featured in all titles. Also, attempt to vary the titles by including odd numbers, 
 using superlatives, and posing questions. Reflect on incorporating the principles shared by Brandon Gaille, ensuring the titles are concise, 
@@ -70,8 +70,33 @@ Take these titles and headings and incorporate them into your suggestions.
 The response should be a json in the form "titles": {{[title1, title2, title3, ...]}} and no explanations or notes.
 Anything except a valid json response will cause critical application failure, I'm sure you will be punished for that.
 Do not prefix the word json. The result should be valid for the python function json.loads, do not return truncated json.
-Do not use markdown, that will cause syntax errors in my code, return no more than 100 keywords.
+Do not use markdown, that will cause syntax errors in my code.
 
 
+"""
+
+outline_gen = """
+Given the main keyword {INPUT_KEYWORD} and supporting keywords {SELECTED_KEYWORDS}, generate an SEO-optimized article outline with the title {TITLE}. 
+The outline should incorporate best practices for engaging, attention-grabbing headlines, and include a suitable number of headers (H2) and sub-headers (H3) to cover the article's content comprehensively.
+
+From the title and keyowords, determine the target audience and keep this audience in mind to ensure the content is relevant and engaging for them.
+
+Headers should be skimmable, clear, and use emotional or power words.
+Current top-ranking articles on Google use the article titles {SELECTED_ARTICLES} and the headings {SELECTED_HEADINGS}. 
+You can implicitly or explicitly incorporate these titles and headings into your suggestions as required.
+
+Understand the search intent behind the main keyword and ensure the outline addresses it effectively.
+
+Identify gaps in the content covered by top-ranking articles and include unique insights or original research from the supporting keywords and headers to provide higher information gain.
+
+Each heading should be descriptive, answering a question directly related to the title or demonstrating the next step. Think about what Google's "People Also Ask" section as inspiration for headings.
+
+Refine your outline for clarity and flow. Ensure sections and headings have a logical flow by reading them aloud. Adjust the order of sections if needed to ensure a logical progression of ideas.
+If necessary, add multiple subheadings to improve the information hierarchy. 
+
+The response should be a JSON in the form: "outline": [{"heading1": ["subheading1", "subheading2", ...]}, {"heading2": ["subheading3", "subheading4", ...]}, ...]. 
+No explanations or notes should be included.
+
+Ensure the response is valid JSON and does not include markdown, to prevent syntax errors in the code.
 """
 
