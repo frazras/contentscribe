@@ -94,7 +94,7 @@ Each heading should be descriptive, answering a question directly related to the
 Refine your outline for clarity and flow. Ensure sections and headings have a logical flow by reading them aloud. Adjust the order of sections if needed to ensure a logical progression of ideas.
 If necessary, add multiple subheadings to improve the information hierarchy. 
 
-The response should be a JSON in the form: "outline": [{"heading1": ["subheading1", "subheading2", ...]}, {"heading2": ["subheading3", "subheading4", ...]}, ...]. 
+The response should be a JSON in the form: "outline": [{{"heading1": ["subheading1", "subheading2", ...]}}, {{"heading2": ["subheading3", "subheading4", ...]}}, ...]. 
 No explanations or notes should be included.
 
 Ensure the response is valid JSON and does not include markdown, do not use the markdown syntax ```json or else I will get syntax errors in the code.
