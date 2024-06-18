@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Disclosure } from '@headlessui/react';
-import { ChevronRightIcon, ArrowsUpDownIcon } from '@heroicons/react/24/outline';
+import { ChevronRightIcon, ArrowsUpDownIcon, PencilSquareIcon } from '@heroicons/react/24/outline';
 import { DndProvider, useDrag, useDrop } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 
@@ -71,12 +71,15 @@ function StepSix({ nextStep, stepData }) {
         <Disclosure>
           {({ open }) => (
             <>
-              <Disclosure.Button className="flex justify-between w-full px-4 py-2 text-sm font-medium text-left text-purple-900 bg-purple-100 rounded-lg hover:bg-purple-200 focus:outline-none focus-visible:ring focus-visible:ring-purple-500 focus-visible:ring-opacity-75">
-                <ArrowsUpDownIcon className="w-4 h-4 text-purple-500 mr-2" />
-                <span>{sectionTitle}</span>
+              <Disclosure.Button className="flex justify-between w-full px-4 py-2 text-sm font-medium text-left text-blue-900 bg-blue-100 rounded-lg hover:bg-blue-200 focus:outline-none focus-visible:ring focus-visible:ring-blue-500 focus-visible:ring-opacity-75">
                 <div className="flex items-center">
+                  <ArrowsUpDownIcon className="w-4 h-4 text-blue-500 mr-2" />
+                  <PencilSquareIcon className="editable w-4 h-4 text-blue-500 mr-2" />
+                  <span className='text-label'>{sectionTitle}</span>
+                </div>
+                <div className="flex items-center ml-auto">
                   <ChevronRightIcon
-                    className={`${open ? 'transform rotate-90' : ''} w-5 h-5 text-purple-500`}
+                    className={`${open ? 'transform rotate-90' : ''} w-5 h-5 text-blue-500`}
                   />
                 </div>
               </Disclosure.Button>
@@ -121,7 +124,7 @@ function StepSix({ nextStep, stepData }) {
                 Processing...
               </div>
             ) : (
-              'Submit Changes'
+              'Generate Article (TODO)'
             )}
           </button>
         </div>
