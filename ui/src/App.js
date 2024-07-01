@@ -6,74 +6,36 @@ import StepTwo from './StepTwo';
 import StepThree from './StepThree';
 import StepFour from './StepFour';
 import StepFive from './StepFive';
+import ArticleBrief from './ArticleBrief';
 import StepSix from './StepSix';
+import StepSeven from './StepSeven';
 import axios from 'axios'; // Import axios for API calls
 // Import other steps as needed
 
 function App() {
   const [currentStep, setCurrentStep] = useState(0);
   const state = {
-    "outline": [
-      {
-        "Discover the Best Time to Travel to Jamaica": [
-          "Unlocking Jamaica's Seasonal Secrets",
-          "A Month-by-Month Guide to Jamaica's Weather and Events"
-        ]
-      },
-      {
-        "Jamaica's Weather Wonderland": [
-          "What is Hurricane Season in Jamaica?",
-          "The Sun-Soaked Days: Best Time for Weather in Jamaica"
-        ]
-      },
-      {
-        "Budget-Friendly Travel to Jamaica": [
-          "Cheapest Time to Go to Jamaica",
-          "Cheapest Month to Fly to Jamaica",
-          "Saving on Sunshine: Cheapest Time to Go to Jamaica All-Inclusive"
-        ]
-      },
-      {
-        "Exploring Jamaica's Gems": [
-          "Best Time to Visit Montego Bay Jamaica",
-          "Negril's Natural Beauty: Best Time to Visit",
-          "Ocho Rios: A Timing Guide for Visitors",
-          "Kingston Uncovered: Best Time to Visit",
-          "Luminous Lagoon: When to Witness Its Glow",
-          "South Coast Sojourns: Optimal Visit Times"
-        ]
-      },
-      {
-        "Special Moments in Jamaica": [
-          "Romantic Escapes: Best Time to Get Married in Jamaica",
-          "Fishing Adventures: Best Time to Go Fishing in Jamaica"
-        ]
-      },
-      {
-        "Cultural Celebrations and Avoiding Crowds": [
-          "Best Time to Visit Jamaica to Avoid Crowds",
-          "Festivals and Events: Timing Your Cultural Experience"
-        ]
-      },
-      {
-        "Travel Tips for UK and North American Travelers": [
-          "Best Time to Go to Jamaica from UK",
-          "Cheapest Time to Fly to Jamaica from Canada",
-          "US to Jamaica: Finding the Cheapest Time to Fly"
-        ]
-      },
-      {
-        "Maximizing Your Stay in Jamaica": [
-          "Is 4 Days Enough in Jamaica?",
-          "When Should You Not Go to Jamaica?",
-          "Is Jamaica Good to Visit in January?",
-          "What is the Off Season for Jamaica?"
-        ]
-      },
-      {
-        "Conclusion: Crafting Your Perfect Jamaican Getaway": []
-      }
-    ]
+      "article_content": [
+        {
+          "Introduction": "Jamaica's climate and seasons play a significant role in determining the best time to travel to this beautiful island. Understanding the weather patterns and seasonal variations can help you make the most of your trip, whether you're seeking sunny beach days or exploring the lush landscapes of Jamaica."
+        },
+        {
+          "Best Time to Visit Jamaica": {
+            "Low Season: June - November": "The low season in Jamaica is from June to November, when the weather is more unpredictable with a higher chance of rain. However, this is also the time when you can find great deals on accommodations and fewer crowds at popular tourist attractions.",
+            "Peak Season: Mid-December – Mid-April": "The peak season in Jamaica is from mid-December to mid-April, when the weather is dry and the temperatures are comfortable. This is the perfect time to visit if you want to enjoy the beautiful beaches and outdoor activities without the risk of rain."
+          }
+        },
+        {
+          "Weather and Activities": {
+            "Best time to go to Hedonism Jamaica": "The best time to visit Hedonism Jamaica is during the dry season, which runs from mid-December to mid-April. This is when you can enjoy the beautiful beaches and outdoor activities without the risk of rain. The resort also hosts special events and parties during this time, making it an ideal period for a lively and vibrant experience.",
+            "What to pack for your trip": "When packing for your trip to Jamaica, it's important to consider the warm and humid climate. Be sure to pack lightweight and breathable clothing, such as shorts, t-shirts, and swimwear. Don't forget to bring sunscreen, sunglasses, and a hat to protect yourself from the strong Caribbean sun. It's also a good idea to pack insect repellent and a light jacket or sweater for cooler evenings. Lastly, remember to bring any necessary travel documents, medications, and personal items to ensure a comfortable and enjoyable trip."
+          }
+        },
+        {
+          "Conclusion": "When deciding the best time to travel to Jamaica, it's important to consider the peak season versus the low season. Peak season, which runs from mid-December to mid-April, offers ideal weather and a lively atmosphere, but it also comes with higher prices and larger crowds. On the other hand, the low season from June to November may have more affordable rates and fewer tourists, but it also brings the risk of hurricanes and more unpredictable weather. Ultimately, the best time to book your trip to Jamaica depends on your preferences for weather, budget, and crowd levels."
+        }
+      ],
+      "title": "Each month reviewed"
   }
   //const [stepData, setStepData] = useState(state);
   const [stepData, setStepData] = useState({});
@@ -88,6 +50,7 @@ function App() {
 
   const callApiForStep = async (step, params) => {
     let endpoint = '';
+    let callApi = true;
 
     switch (step) {
       case 1:
@@ -141,7 +104,14 @@ function App() {
         }
         break;
       case 5:
+        endpoint = '/api/articlebrief';
+        callApi = false;
+        break;
+      case 6:
         endpoint = '/api/outlinegen';
+        break;
+      case 7:
+        endpoint = '/api/articlegen';
         break;
       default:
         console.error('Invalid step for callApiForStep', step);
@@ -155,14 +125,15 @@ function App() {
         Object.entries(params).forEach(([key, value]) => {
           globalData.current[key] = value;
         });
-        let response = await axios.post(endpoint, globalData.current);
-        // Append contents of response.data.results to globalData.current with its own key
-        Object.entries(response.data.results).forEach(([key, value]) => {
-          globalData.current[key] = value;
-        });
-        setStepData(response.data.results);
-        console.log("response", response);
-
+        if (callApi) {
+          let response = await axios.post(endpoint, globalData.current);
+          // Append contents of response.data.results to globalData.current with its own key
+          Object.entries(response.data.results).forEach(([key, value]) => {
+            globalData.current[key] = value;
+          });
+          setStepData(response.data.results);
+          console.log("response", response);
+        }
 
 
       } catch (error) {
@@ -196,7 +167,9 @@ function App() {
           {currentStep === 2 && <StepThree prevStep={prevStep} nextStep={nextStep} stepData={stepData} />}
           {currentStep === 3 && <StepFour prevStep={prevStep} nextStep={nextStep} stepData={stepData} />}
           {currentStep === 4 && <StepFive prevStep={prevStep} nextStep={nextStep} stepData={stepData} />}
-          {currentStep === 5 && <StepSix prevStep={prevStep} nextStep={nextStep} stepData={stepData} />}
+          {currentStep === 5 && <ArticleBrief prevStep={prevStep} nextStep={nextStep} stepData={stepData} />}
+          {currentStep === 6 && <StepSix prevStep={prevStep} nextStep={nextStep} stepData={stepData} />}
+          {currentStep === 7 && <StepSeven prevStep={prevStep} nextStep={nextStep} stepData={stepData} />}
           {/* Add additional steps here */}
         </div>
       </div>

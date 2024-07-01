@@ -124,7 +124,7 @@ function StepSix({ nextStep, stepData }) {
                 Processing...
               </div>
             ) : (
-              'Generate Article (TODO)'
+              'Generate Article'
             )}
           </button>
         </div>
