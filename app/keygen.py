@@ -12,9 +12,12 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Access variables securely
-LLM_MODEL = os.getenv('LLM_MODEL', 'gpt-4-turbo')  # Provide a default value if not set
+LLM_MODEL = os.getenv('LLM_MODEL', 'gpt-4o')  # Smart AI
+LLM_MODEL_B = os.getenv('LLM_MODEL_B', 'gpt-3.5-turbo')  # Fast AI
 API_KEY = os.getenv('API_KEY')
+API_KEY_B = os.getenv('API_KEY_B',API_KEY)
 BASE_URL = os.getenv('BASE_URL', 'https://api.openai.com/v1')  # Provide a default value if not set
+BASE_URL_B = os.getenv('BASE_URL_B', BASE_URL)  # Provide a default value if not set
 
 async def get_keyword_data(input_keyword, input_country, additional_keywords):
     # Get results
@@ -63,7 +66,7 @@ def remove_similar_keywords(keyword_data):
 async def suggestions_ai_analysis(keyword_data: str):
     max_retries = 5
     print("ANALYZING KEY WORDS")
-
+    
     for _ in range(max_retries):
         try:
             # Get Json Structure
@@ -72,7 +75,7 @@ async def suggestions_ai_analysis(keyword_data: str):
             )
             print("awaiting Ai KEY WORDS")
 
-            return await generate_response(prompt, LLM_MODEL, API_KEY,BASE_URL, 0)
+            return await generate_response(prompt, LLM_MODEL_B, API_KEY_B,BASE_URL_B, 0)
 
         except Exception as e:
             print(
@@ -94,7 +97,7 @@ async def suggestions_ai_analysis_headings(heading_data: str):
             print("awaiting Ai HEADINGS")
 
             # Generate response and directly parse JSON to avoid escaped text
-            response = await generate_response(prompt, LLM_MODEL, API_KEY, BASE_URL, 0)
+            response = await generate_response(prompt, LLM_MODEL_B, API_KEY_B, BASE_URL_B, 0)
             if response:
                 try:
                     return json.loads(response)  # Directly parse the JSON response to remove escaped text
@@ -134,7 +137,7 @@ async def title_gen_ai_analysis(context_data: str):
             print(prompt)
             #pint newline
             print("\n")
-            response = await generate_response(prompt, LLM_MODEL, API_KEY, BASE_URL, 0)
+            response = await generate_response(prompt, LLM_MODEL_B, API_KEY_B, BASE_URL_B, 0)
             if response:
                 print("RESPONSE")
                 print(response)
