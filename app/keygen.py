@@ -156,8 +156,10 @@ async def outline_gen_ai_analysis(context_data: str):
     selected_articles = [article['title'] for article in context_data.get('selected_articles')]
     selected_headings = context_data.get('selected_headings')
     selected_keywords = context_data.get('selected_keywords')
-    title = context_data.get('title')
+    title = context_data.get('customTitle') or context_data.get('selectedTitle')
     input_keyword = context_data.get('input_keyword')
+    context = context_data.get('context')
+    article_brief = context_data.get('articleBrief')
     print("retrieved variables")
     for _ in range(max_retries):
         try:
@@ -168,7 +170,9 @@ async def outline_gen_ai_analysis(context_data: str):
                 SELECTED_ARTICLES=selected_articles,
                 SELECTED_HEADINGS=selected_headings,
                 SELECTED_KEYWORDS=selected_keywords,
-                TITLE=title
+                TITLE=title,
+                CONTEXT=context,
+                ARTICLE_BRIEF=article_brief
             )
             print("awaiting Ai OUTLINE")
             print(prompt)
@@ -188,6 +192,59 @@ async def outline_gen_ai_analysis(context_data: str):
                 f"Failed to generate analysis for suggestion ai outline. Exception type: {type(e).__name__}, Message: {str(e)}"
             )
     return {}
+
+async def article_gen_ai_analysis(context_data: str):
+    max_retries = 5
+    print("ANALYZING data for article gen")
+    selected_headings = context_data.get('selected_headings')
+    selected_articles = [article['title'] for article in context_data.get('selected_articles')]
+    selected_keywords = context_data.get('selected_keywords')
+    title = context_data.get('customTitle') or context_data.get('selectedTitle')
+    input_keyword = context_data.get('input_keyword')
+    article_outline = context_data.get('outline')
+    context = context_data.get('context')
+    article_brief = context_data.get('articleBrief')
+    article_content = []
+
+    for section in article_outline:
+        for header, sub_headers in section.items():
+            for _ in range(max_retries):
+                try:
+                    print("formatting prompt")
+                    # Prepare the prompt with heading data
+                    prompt = article_gen.format(
+                        INPUT_KEYWORD=input_keyword,
+                        SELECTED_ARTICLES=selected_articles,
+                        SELECTED_HEADINGS=selected_headings,
+                        SELECTED_KEYWORDS=selected_keywords,
+                        TITLE=title,
+                        HEADER=header,
+                        SUB_HEADERS=sub_headers,
+                        OUTLINE=article_outline,
+                        CONTEXT=context,
+                        ARTICLE_BRIEF=article_brief
+                    )
+                    print("awaiting Ai ARTICLE")
+                    print(prompt)
+                    #print newline
+                    print("\n")
+                    response = await generate_response(prompt, LLM_MODEL, API_KEY, BASE_URL, 0)
+                    if response:
+                        print("RESPONSE")
+                        print(response)
+                        try:
+                            article_content.append(json.loads(response))  # Directly parse the JSON response to remove escaped text
+                            break
+                        except json.JSONDecodeError as e:
+                            print(f"JSON decoding failed: {str(e)} - Response was: '{response}'")
+                            article_content.append({})
+                except Exception as e:
+                    print(
+                        f"Failed to generate analysis for suggestion ai article. Exception type: {type(e).__name__}, Message: {str(e)}"
+                    )
+                    
+    return article_content
+    
 
 async def get_suggestion_keywords_google_optimized(query, countryCode):
     # Define categorization keywords for all categories

@@ -76,9 +76,13 @@ Do not use markdown, that will cause syntax errors in my code.
 """
 
 outline_gen = """
-Given the main keyword {INPUT_KEYWORD} and supporting keywords {SELECTED_KEYWORDS}, generate an SEO-optimized article outline with the title {TITLE}. 
-The outline should incorporate best practices for engaging, attention-grabbing headlines, and include a suitable number of headers (H2) and sub-headers (H3) to cover the article's content comprehensively.
-
+Given the main keyword {INPUT_KEYWORD} and supporting keywords {SELECTED_KEYWORDS}, generate an SEO-optimized article outline that strongly reflects the title {TITLE} and the context {CONTEXT}.
+Take strongly the following Article Brief into account when generating the outline: {ARTICLE_BRIEF} .
+The outline should incorporate best practices for engaging, attention-grabbing headlines, and include a suitable number of headers (H2)based on what will fulfill the title and sub-headers (H3) to cover the each header's content comprehensively. H3 should be titles for the content and not descriptions of the content.
+The outline should be logically structured and flowed. Eg. it should start with the introduction and then proceed to the next section, then the next, then end with the conclusion. each section should logically lead into the next section.
+The structure should also be influenced by the type of article as implied by the title. Eg. If the title is a listicle, the outline should be a list of items as suggested by the title. How-to guides should have an intro, followed by a step by step process, and a conclusion.
+Don't try to force a topic listed in the keywords and context if it does not fit the implied article structure.
+Include FAQs if the context and keywords imply that there are a lot of questions around the main keyword.
 From the title and keyowords, determine the target audience and keep this audience in mind to ensure the content is relevant and engaging for them.
 
 Headers should be skimmable, clear, and use emotional or power words.
@@ -100,3 +104,18 @@ No explanations or notes should be included.
 Ensure the response is valid JSON and does not include markdown, do not use the markdown syntax ```json or else I will get syntax errors in the code.
 """
 
+article_gen = """
+Given the main keyword {INPUT_KEYWORD} and supporting keywords {SELECTED_KEYWORDS}, generate the section titled {HEADER} and sub-sections adressing the topics : {SUB_HEADERS} for an SEO-optimized article with the title {TITLE}. 
+Take strongly the following Article Brief into account when generating the content: {ARTICLE_BRIEF} .
+From the title and keywords, determine the target audience and keep this audience in mind to ensure the content is relevant and engaging for them.
+
+Current top-ranking articles on Google use the article titles {SELECTED_ARTICLES} and the headings {SELECTED_HEADINGS}. 
+The context is based around this information: {CONTEXT}.
+Outline shows the complete structure of the article: {OUTLINE}.
+Understand the search intent behind the main keyword and ensure the sections addresses it effectively.
+
+The response should be a JSON in the form: "{{{HEADER}": "generated content"}}. 
+No explanations or notes should be included.
+
+Ensure the response is valid JSON and does not include markdown, do not use the markdown syntax ```json or else I will get syntax errors in the code.
+"""

@@ -18,6 +18,7 @@ async def generate_response(user_prompt, model, api_key, base_url="https://api.o
                 model=model,
                 messages=[{"role": "user", "content": user_prompt}],
                 temperature=temperature,
+                response_format={"type": "json_object"}
             )
             response = completion.choices[0].message.content
 
