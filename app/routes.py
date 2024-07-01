@@ -90,7 +90,12 @@ async def generate_title():
         results = {'error': 'Failed to fetch data', 'status_code': response.status_code}
 
     tavily = TavilyClient(api_key=os.getenv('TAVILY_API_KEY'))
-    response = tavily.search(query=input_keyword, search_depth="advanced")
+    
+    try:
+        response = tavily.search(query=input_keyword, search_depth="advanced")
+    except requests.exceptions.HTTPError as e:
+        logging.error(f"HTTPError: {e.response.status_code} - {e.response.text}")
+        return jsonify({"error": "Failed to fetch data from Tavily", "details": e.response.text}), 500
     
     # Log the response object to debug its structure
     logging.debug(f"Response object: {response}")
