@@ -40,21 +40,28 @@ async def get_keyword_data(input_keyword, input_country, additional_keywords):
     print("Got " + str(len(keyword_data)) + " cleaned keywords")
     print(json.dumps(keyword_data, indent=4))
     
-    ai_report = await suggestions_ai_analysis(keyword_data)
-    print(ai_report)
-    # convert to json
-    try:
-        ai_report = json.loads(ai_report)
-    except json.JSONDecodeError as e:
-        print(f"JSON decoding failed: {str(e)} - Response was: '{ai_report}'")
-        ai_report = {}
+    max_attempts = 2
+    for attempt in range(max_attempts):
+        try:
+            ai_report = await suggestions_ai_analysis(keyword_data)
+            print(ai_report)
+            # convert to json
+            try:
+                ai_report = json.loads(ai_report)
+            except json.JSONDecodeError as e:
+                print(f"JSON decoding failed: {str(e)} - Response was: '{ai_report}'")
+                ai_report = {}
+            break
+        except Exception as e:
+            print(f"Exception occurred: {str(e)}. Attempt {attempt + 1} of {max_attempts}")
+            if attempt == max_attempts - 1:
+                ai_report = {}
+
     # Preparing the result
     result = {
         "success": True,
         "results": ai_report,
     }
-
-    
 
     return result
 
