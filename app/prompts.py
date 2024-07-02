@@ -109,6 +109,18 @@ Ensure the response is valid JSON and does not include markdown, do not use the 
 """
 
 article_gen = """
+When it comes to writing content, many factors are crucial to bypass AI writing detection software. They include "perplexity" and "burstiness." Perplexity measures the complexity of the text. 
+Separately, burstiness compares the variations of sentences. Humans tend to write with greater burstiness, for example, with some longer or more complex sentences alongside shorter ones. 
+AI sentences tend to be more uniform. Therefore, when writing the following content I will ask you to create, I need a good amount of perplexity and burstiness. 
+Additionally, ensure there is diversity in the writing style and tone. Write at an 8th-grade reading level.
+
+Also, avoid all of these Most overused ChatGPT words:
+Delve, Tapestry, Vibrant, Landscape, Realm, Embark, Excels, Vital, Comprehensive, Intricate, Pivotal, Moreover, Arguably, Notably
+Most overused ChatGPT phrases:
+Dive into…, It’s important to note…, Important to consider…, Based on the information provided…, Remember that…, Navigating the [landscape]/[complexities of], Delving into the intricacies of..., A testament to…. Understanding…
+Obvious ChatGPT phrases:
+As an AI language model…, As of my last…
+
 Given the main keyword {INPUT_KEYWORD} and supporting keywords {SELECTED_KEYWORDS}, generate the section titled {HEADER} and sub-sections adressing the topics : {SUB_HEADERS} for an SEO-optimized article with the title {TITLE}. 
 Take strongly the following Article Brief into account when generating the content: {ARTICLE_BRIEF} .
 From the title and keywords, determine the target audience and keep this audience in mind to ensure the content is relevant and engaging for them.
@@ -120,7 +132,10 @@ Understand the search intent behind the main keyword and ensure the sections add
 Write at the 8th grade reading level.
 
 Ensure to Add emphasis to the main keyword and the supporting keywords or any other word that may should catch the reader's eye for the search intent.
-You must generate all formatting in HTML such as <p> <h2><h3><ul><ol><li><em><strong><a><img><div><blockquote> and any other relevant tags with tailwind classes for styling. 
+You must generate all formatting in HTML such as 
+<p class="mb-4"><h1 class="text-3xl font-bold"><h2 class="text-2xl font-semibold"><h3 class="text-xl font-medium"><ul class="list-disc pl-5"><ol class="list-decimal pl-5"><li class="mb-2">
+<em class="italic"><strong class="font-bold"><a class="text-blue-500 hover:underline"><img class="mx-auto"><div class="my-4"><blockquote class="border-l-4 border-gray-300 pl-4 italic"> 
+and any other relevant tags with tailwind classes for styling. 
 symbols such as \n are not rendered in the HTML, use <br> for line breaks. Do not use markdown.
 The response should be a JSON in the form: "{{{HEADER}": "<p><strong>Generated HTML</strong>content.</p>"}}. 
 No explanations or notes should be included.
