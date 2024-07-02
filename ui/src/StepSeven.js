@@ -53,17 +53,7 @@ function StepSeven({ nextStep, stepData }) {
             <div key={index} className="mb-4">
               {Object.keys(section).map((heading, subIndex) => (
                 <div key={subIndex}>
-                  <h3 className="font-semibold">{heading}</h3>
-                  {typeof section[heading] === 'string' ? (
-                    <p>{section[heading]}</p>
-                  ) : (
-                    Object.keys(section[heading]).map((subHeading, subSubIndex) => (
-                      <div key={subSubIndex} className="ml-4">
-                        <h4 className="font-semibold">{subHeading}</h4>
-                        <p>{section[heading][subHeading]}</p>
-                      </div>
-                    ))
-                  )}
+                  <div dangerouslySetInnerHTML={{ __html: section[heading] }} />
                 </div>
               ))}
             </div>

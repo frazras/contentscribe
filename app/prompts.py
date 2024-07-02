@@ -113,13 +113,12 @@ Current top-ranking articles on Google use the article titles {SELECTED_ARTICLES
 The context is based around this information: {CONTEXT}.
 Outline shows the complete structure of the article: {OUTLINE}.
 Understand the search intent behind the main keyword and ensure the sections addresses it effectively.
-
-The response should be a JSON in the form: "{{{HEADER}": "generated content"}}. 
-No explanations or notes should be included.
-
 Write at the 8th grade reading level.
 
-Generate all formatting in HTML. Add emphasis to the main keyword and the supporting keywords or any other word that may should catch the reader's eye for the search intent.
+Ensure to Add emphasis to the main keyword and the supporting keywords or any other word that may should catch the reader's eye for the search intent.
+You must generate all formatting in HTML such as <p> <h2><h3><ul><ol><li><em><strong><a><img><div><blockquote> and any other relevant tags with tailwind classes for styling. 
+symbols such as \n are not rendered in the HTML, use <br> for line breaks. Do not use markdown.
+The response should be a JSON in the form: "{{{HEADER}": "<p><strong>Generated HTML</strong>content.</p>"}}. 
+No explanations or notes should be included.
 
-Ensure the response is valid JSON and does not include markdown, do not use the markdown syntax ```json or else I will get syntax errors in the code.
 """

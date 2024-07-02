@@ -15,7 +15,6 @@ function StepSix({ nextStep, stepData }) {
   const handleSubmit = useCallback(async () => {
     setIsSubmitting(true);
     await nextStep({ ...stepData, outline });
-    setIsSubmitting(false);
   }, [nextStep, stepData, outline]);
 
   const moveSection = (dragIndex, hoverIndex) => {
