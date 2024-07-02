@@ -7,6 +7,7 @@ from .prompts import *
 from .llm import *
 import os
 from dotenv import load_dotenv
+import json_repair
 
 # Load environment variables from .env file
 load_dotenv()
@@ -47,7 +48,7 @@ async def get_keyword_data(input_keyword, input_country, additional_keywords):
             print(ai_report)
             # convert to json
             try:
-                ai_report = json.loads(ai_report)
+                ai_report = json_repair.loads(ai_report)
             except json.JSONDecodeError as e:
                 print(f"JSON decoding failed: {str(e)} - Response was: '{ai_report}'")
                 ai_report = {}
@@ -107,7 +108,7 @@ async def suggestions_ai_analysis_headings(heading_data: str):
             response = await generate_response(prompt, LLM_MODEL_B, API_KEY_B, BASE_URL_B, 0)
             if response:
                 try:
-                    return json.loads(response)  # Directly parse the JSON response to remove escaped text
+                    return json_repair.loads(response)  # Directly parse the JSON response to remove escaped text
                 except json.JSONDecodeError as e:
                     print(f"JSON decoding failed: {str(e)} - Response was: '{response}'")
                     return {}
@@ -149,7 +150,7 @@ async def title_gen_ai_analysis(context_data: str):
                 print("RESPONSE")
                 print(response)
                 try:
-                    return json.loads(response)  # Directly parse the JSON response to remove escaped text
+                    return json_repair.loads(response)  # Directly parse the JSON response to remove escaped text
                 except json.JSONDecodeError as e:
                     print(f"JSON decoding failed: {str(e)} - Response was: '{response}'")
                     return {}
@@ -193,7 +194,7 @@ async def outline_gen_ai_analysis(context_data: str):
                 print("RESPONSE")
                 print(response)
                 try:
-                    return json.loads(response)  # Directly parse the JSON response to remove escaped text
+                    return json_repair.loads(response)  # Directly parse the JSON response to remove escaped text
                 except json.JSONDecodeError as e:
                     print(f"JSON decoding failed: {str(e)} - Response was: '{response}'")
                     return {}
@@ -243,7 +244,7 @@ async def article_gen_ai_analysis(context_data: str):
                         print("RESPONSE")
                         print(response)
                         try:
-                            article_content.append(json.loads(response))  # Directly parse the JSON response to remove escaped text
+                            article_content.append(json_repair.loads(response))  # Directly parse the JSON response to remove escaped text
                             break
                         except json.JSONDecodeError as e:
                             print(f"JSON decoding failed: {str(e)} - Response was: '{response}'")

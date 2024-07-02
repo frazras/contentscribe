@@ -11,3 +11,4 @@ gevent==24.2.1
 beautifulsoup4==4.12.3
 python-dotenv==1.0.1
 tavily-python==0.3.3
+json-repair==0.25.2

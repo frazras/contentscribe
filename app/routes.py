@@ -4,6 +4,7 @@ import json
 from .keygen import get_keyword_data, combine_headings, title_gen_ai_analysis, outline_gen_ai_analysis, article_gen_ai_analysis
 import requests
 from tavily import TavilyClient
+from json_repair import repair_json
 
 import os
 from dotenv import load_dotenv
@@ -38,7 +39,7 @@ async def generate_keywords():
     # Attempt to load additional_keywords safely
     additional_keywords_str = data.get('additional_keywords', '[]')
     try:
-        additional_keywords = json.loads(additional_keywords_str)
+        additional_keywords = json_repair.loads(additional_keywords_str)
     except json.JSONDecodeError:
         return jsonify({"error": "Bad Request", "message": "Invalid JSON format for additional_keywords."}), 400
     

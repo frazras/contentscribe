@@ -11,6 +11,8 @@ import StepSix from './StepSix';
 import StepSeven from './StepSeven';
 import axios from 'axios'; // Import axios for API calls
 // Import other steps as needed
+import { JsonView, allExpanded, darkStyles, defaultStyles } from 'react-json-view-lite';
+import 'react-json-view-lite/dist/index.css';
 
 function App() {
   const [currentStep, setCurrentStep] = useState(0);
@@ -173,6 +175,12 @@ function App() {
           {/* Add additional steps here */}
         </div>
       </div>
+      {Object.keys(globalData.current).length > 0 && (
+        <div style={{ textAlign: 'left' }}>
+          Context Data:
+          <JsonView data={globalData.current} shouldExpandNode={() => false} clickToExpandNode={true} allExpanded={false} style={darkStyles} />
+        </div>
+      )}
     </div>
   );
 }
