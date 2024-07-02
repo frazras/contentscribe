@@ -44,11 +44,14 @@ Do not use markdown, that will cause syntax errors in my code, return no more th
 """
 
 keyword_aggregation = """
-
+You are a keyword research expert, you under stand keyword context and relevance.
 Return no more than 100 keywords, return only the most relevant 100 or less keywords.
-For the following Keyword_data, create a comprehensive list of keywords by removing all duplicates,
-pluralizations, alternate ordering and phrasing of words or the same idea, grouping of related keywords.
+For the following Keyword_data, create a comprehensive list of keywords by removing all duplicates.
+Remove pluralizations, remove alternate ordering and phrasing of words or the same idea, remove grouping of related keywords.
 Ensure the new list maintains search intent and does not significantly change the word usage.
+Your main purpose is to do a non-destructive keyword aggregation that reduces the amount of keywords but maintains the context of keywords.
+Eg. If you have "best time to visit Jamaica" and "best time to travel to Jamaica", you should choose one of the two because they mean the same thing, 
+especially if your list is over 100, you can be less destructive in your removal with smaller lists.
 Return the list of keywords as json in the form "keywords": {{[keyword1, keyword2, keyword3, ...]}} and sorted by relevance to each other
 but do not duplicate or pad keywords, you wil be harshly punished for returning duplicates. Valid Json must be returned as your response - no explanations, no notes.
 Anything except a valid json response will cause critical application failure, I'm sure you will be punished for that.
