@@ -16,8 +16,8 @@ LLM_MODEL = os.getenv('LLM_MODEL', 'gpt-4o')  # Smart AI
 LLM_MODEL_B = os.getenv('LLM_MODEL_B', 'gpt-3.5-turbo')  # Fast AI
 API_KEY = os.getenv('API_KEY')
 API_KEY_B = os.getenv('API_KEY_B',API_KEY)
-BASE_URL = os.getenv('BASE_URL', 'https://api.openai.com/v1')  # Provide a default value if not set
-BASE_URL_B = os.getenv('BASE_URL_B', BASE_URL)  # Provide a default value if not set
+BASE_URL = os.getenv('BASE_URL', 'https://api.openai.com/v1')
+BASE_URL_B = os.getenv('BASE_URL_B', BASE_URL)
 
 async def get_keyword_data(input_keyword, input_country, additional_keywords):
     # Get results

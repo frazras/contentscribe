@@ -117,6 +117,8 @@ Understand the search intent behind the main keyword and ensure the sections add
 The response should be a JSON in the form: "{{{HEADER}": "generated content"}}. 
 No explanations or notes should be included.
 
+Write at the 8th grade reading level.
+
 Generate all formatting in HTML. Add emphasis to the main keyword and the supporting keywords or any other word that may should catch the reader's eye for the search intent.
 
 Ensure the response is valid JSON and does not include markdown, do not use the markdown syntax ```json or else I will get syntax errors in the code.
