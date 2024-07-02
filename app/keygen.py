@@ -20,7 +20,7 @@ API_KEY_B = os.getenv('API_KEY_B',API_KEY)
 BASE_URL = os.getenv('BASE_URL', 'https://api.openai.com/v1')
 BASE_URL_B = os.getenv('BASE_URL_B', BASE_URL)
 
-async def get_keyword_data(input_keyword, input_country, additional_keywords):
+async def get_keyword_data(input_keyword, input_country):
     # Get results
     print("GETTTING KEY WORDS")
 
