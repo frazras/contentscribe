@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 
-function StepTwo({ nextStep, stepData }) {
+function KeywordResearch({ nextStep, stepData }) {
   const [selectedKeywords, setSelectedKeywords] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [validationError, setValidationError] = useState(false); // Added state to handle validation error
 
   useEffect(() => {
     console.log('Keywords StepData on load:', stepData);
@@ -18,10 +17,6 @@ function StepTwo({ nextStep, stepData }) {
   };
 
   const handleSubmit = async () => {
-    if (selectedKeywords.length === 0) {
-      setValidationError(true); // Set validation error if no keywords are selected
-      return;
-    }
     setIsSubmitting(true);
     await nextStep({ selected_keywords: selectedKeywords });
   };
@@ -32,7 +27,7 @@ function StepTwo({ nextStep, stepData }) {
       <p className="mb-4">Choose relevant keywords to enhance your content's visibility.</p>
 
       <div className="overflow-y-scroll h-64 border border-gray-300 rounded px-4 py-2">
-        {stepData?.keywords ? stepData.keywords.map((keyword, index) => (
+        {stepData?.keywords && stepData.keywords.length > 0 ? stepData.keywords.map((keyword, index) => (
           <label key={index} className="block">
             <input
               type="checkbox"
@@ -42,9 +37,17 @@ function StepTwo({ nextStep, stepData }) {
             />
             {keyword}
           </label>
-        )) : "No keywords found"}
+        )) : (
+          <div className="text-center p-4">
+            <h3 className="text-lg font-semibold mb-2 text-red-600">No related keywords found.</h3>
+            <p className='text-sm'>
+              <strong>Refresh</strong> to try a <strong>broader search term</strong> for more <strong>related keywords</strong>, or you can proceed without them.
+              <br /><br />
+              Having more <strong>relevant keywords</strong> will improve your article's quality and performance.
+            </p>
+          </div>
+        )}
       </div>
-      {validationError && <p className="text-red-500 text-sm mt-1 font-bold">Please select at least one keyword.</p>}
 
       <div className="flex justify-end mt-4">
         <button
@@ -60,12 +63,12 @@ function StepTwo({ nextStep, stepData }) {
               </svg>
               Processing...
             </div>
-          ) : 'Review Search Results'}
+          ) : 'Research Similar Articles'}
         </button>
       </div>
     </div>
   );
 }
 
-export default StepTwo;
+export default KeywordResearch;
 

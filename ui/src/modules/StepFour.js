@@ -5,7 +5,6 @@ function StepFour({ nextStep, stepData }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [progress, setProgress] = useState(0);
   const [bars, setBars] = useState("░");
-  const [validationError, setValidationError] = useState(false); // Added state to handle validation error
   const progressInterval = useRef(null);
 
   useEffect(() => {
@@ -21,10 +20,6 @@ function StepFour({ nextStep, stepData }) {
   };
   
   const handleSubmit = async () => {
-    if (selectedHeadings.length === 0) {
-      setValidationError(true); // Set validation error if no headings are selected
-      return;
-    }
     setIsSubmitting(true);
     initProgressBar();
     await nextStep({selected_headings: selectedHeadings});
@@ -71,7 +66,6 @@ function StepFour({ nextStep, stepData }) {
           </label>
         )) : "No headings found"}
       </div>
-      {validationError && <p className="text-red-500 text-sm mt-1 font-bold">Please select at least one heading.</p>}
 
       <div className="flex justify-end mt-4">
         <button

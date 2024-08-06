@@ -1,7 +1,7 @@
 import logging
 from flask import Blueprint, request, jsonify
 import json
-from .keygen import get_keyword_data, combine_headings, title_gen_ai_analysis, outline_gen_ai_analysis, article_gen_ai_analysis
+from .keygen import get_keyword_data, combine_headings, title_gen_ai_analysis, outline_gen_ai_analysis, article_gen_ai_analysis, perplexity_ai_analysis
 import requests
 from tavily import TavilyClient
 
@@ -64,7 +64,7 @@ async def generate_title():
         "gl": country
     })
     headers = {
-        'X-API-KEY': 'a844e5c414e5254be8909375d552269b3b4bd8db',
+        'X-API-KEY': os.getenv('SERPER_API_KEY'),
         'Content-Type': 'application/json'
     }
 
@@ -74,10 +74,14 @@ async def generate_title():
         results_data = response.json()
         organic_results = results_data.get('organic', [])
         extracted_data = []
+        ignored_domains = ['youtube.com', 'pinterest.com', 'quora.com', 'reddit.com', 'tiktok.com', 'instagram.com', 'facebook.com', 'amazon.com', 'tripadvisor.com']
         for result in organic_results:
+            urllink = result.get('link')
+            domain = urllink.split('/')[2]  # Extract the domain from the URL
+            if any(ignored_domain in domain for ignored_domain in ignored_domains):
+                continue
             title = result.get('title')
             position = result.get('position')
-            urllink = result.get('link')
             extracted_data.append({'title': title, 'position': position, 'url': urllink})
         results = extracted_data
     else:
@@ -176,5 +180,8 @@ async def article_brief():
     print("GOT REQUEST")
     data = request.json
     print("GOT DATA")
-    
-    return jsonify({"success": True, "results": data})
+    print(data)
+    brief = await perplexity_ai_analysis(data)
+    print("GOT BRIEF")
+    print(brief)
+    return jsonify({"success": True, "results": brief})

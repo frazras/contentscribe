@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 
-function ArticleBrief({ nextStep, stepData }) {
+function UserPrompt({ nextStep, stepData }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [articleBrief, setArticleBrief] = useState('');
+  const [userPrompt, setUserPrompt] = useState('');
 
   useEffect(() => {
     console.log('Stepdata on load:', stepData);
@@ -10,18 +10,18 @@ function ArticleBrief({ nextStep, stepData }) {
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
-    await nextStep({ ...stepData, articleBrief });
+    await nextStep({ ...stepData, userPrompt });
   };
 
   return (
     <div>
-      <h2 className="text-lg font-semibold mb-4">Enter an Article Brief</h2>
-      <p className="mb-4">Provide a specific detail about the article you want to create. Instruct the AI by outlining specific details including examples and formatting structure.</p>
+      <h2 className="text-lg font-semibold mb-4">Enter Your Prompt</h2>
+      <p className="mb-4">Provide specific directions for the article you want to create. Instruct the AI by outlining specific details, including examples and formatting structure, as if you were prompting ChatGPT.</p>
 
       <textarea
-        value={articleBrief}
-        onChange={(e) => setArticleBrief(e.target.value)}
-        placeholder="Enter your article brief here"
+        value={userPrompt}
+        onChange={(e) => setUserPrompt(e.target.value)}
+        placeholder="Enter your prompt here"
         className="w-full p-2 border border-gray-300 rounded mb-4"
         rows="6"
       />
@@ -49,4 +49,4 @@ function ArticleBrief({ nextStep, stepData }) {
   );
 }
 
-export default ArticleBrief;
+export default UserPrompt;

@@ -7,6 +7,7 @@ function StepFive({ nextStep, stepData }) {
   const [useCustomTitle, setUseCustomTitle] = useState(false);
   const [progress, setProgress] = useState(0);
   const [bars, setBars] = useState("░");
+  const [errorMessage, setErrorMessage] = useState('');
   const progressInterval = useRef(null);
 
   useEffect(() => {
@@ -15,9 +16,18 @@ function StepFive({ nextStep, stepData }) {
 
   const handleTitleChange = (title) => {
     setSelectedTitle(title);
+    setErrorMessage('');
   };
 
   const handleSubmit = async () => {
+    if (!useCustomTitle && !selectedTitle) {
+      setErrorMessage("Please select a title or create a custom title.");
+      return;
+    }
+    if (useCustomTitle && !customTitle) {
+      setErrorMessage("Please enter your custom title.");
+      return;
+    }
     setIsSubmitting(true);
     initProgressBar();
     const submissionData = useCustomTitle && customTitle ? { customTitle } : { selectedTitle };
@@ -77,6 +87,7 @@ function StepFive({ nextStep, stepData }) {
               if (e.target.checked) {
                 setSelectedTitle('');
               }
+              setErrorMessage('');
             }}
             className="form-checkbox"
           />
@@ -89,10 +100,19 @@ function StepFive({ nextStep, stepData }) {
           <input
             type="text"
             value={customTitle}
-            onChange={(e) => setCustomTitle(e.target.value)}
+            onChange={(e) => {
+              setCustomTitle(e.target.value);
+              setErrorMessage('');
+            }}
             placeholder="Enter your custom title here"
             className="w-full p-2 border border-gray-300 rounded"
           />
+        </div>
+      )}
+
+      {errorMessage && (
+        <div className="text-red-500 mb-4">
+          {errorMessage}
         </div>
       )}
 

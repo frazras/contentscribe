@@ -1,47 +1,16 @@
 // src/App.js
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import './App.css'; // This now imports Tailwind CSS
-import StepOne from './StepOne';
-import StepTwo from './StepTwo';
-import StepThree from './StepThree';
-import StepFour from './StepFour';
-import StepFive from './StepFive';
-import ArticleBrief from './ArticleBrief';
-import StepSix from './StepSix';
-import StepSeven from './StepSeven';
 import axios from 'axios'; // Import axios for API calls
-// Import other steps as needed
 import { JsonView, allExpanded, darkStyles, defaultStyles } from 'react-json-view-lite';
 import 'react-json-view-lite/dist/index.css';
 
 function App() {
   const [currentStep, setCurrentStep] = useState(0);
-  const state = {
-      "article_content": [
-        {
-          "Introduction": "Jamaica's climate and seasons play a significant role in determining the best time to travel to this beautiful island. Understanding the weather patterns and seasonal variations can help you make the most of your trip, whether you're seeking sunny beach days or exploring the lush landscapes of Jamaica."
-        },
-        {
-          "Best Time to Visit Jamaica": {
-            "Low Season: June - November": "The low season in Jamaica is from June to November, when the weather is more unpredictable with a higher chance of rain. However, this is also the time when you can find great deals on accommodations and fewer crowds at popular tourist attractions.",
-            "Peak Season: Mid-December – Mid-April": "The peak season in Jamaica is from mid-December to mid-April, when the weather is dry and the temperatures are comfortable. This is the perfect time to visit if you want to enjoy the beautiful beaches and outdoor activities without the risk of rain."
-          }
-        },
-        {
-          "Weather and Activities": {
-            "Best time to go to Hedonism Jamaica": "The best time to visit Hedonism Jamaica is during the dry season, which runs from mid-December to mid-April. This is when you can enjoy the beautiful beaches and outdoor activities without the risk of rain. The resort also hosts special events and parties during this time, making it an ideal period for a lively and vibrant experience.",
-            "What to pack for your trip": "When packing for your trip to Jamaica, it's important to consider the warm and humid climate. Be sure to pack lightweight and breathable clothing, such as shorts, t-shirts, and swimwear. Don't forget to bring sunscreen, sunglasses, and a hat to protect yourself from the strong Caribbean sun. It's also a good idea to pack insect repellent and a light jacket or sweater for cooler evenings. Lastly, remember to bring any necessary travel documents, medications, and personal items to ensure a comfortable and enjoyable trip."
-          }
-        },
-        {
-          "Conclusion": "When deciding the best time to travel to Jamaica, it's important to consider the peak season versus the low season. Peak season, which runs from mid-December to mid-April, offers ideal weather and a lively atmosphere, but it also comes with higher prices and larger crowds. On the other hand, the low season from June to November may have more affordable rates and fewer tourists, but it also brings the risk of hurricanes and more unpredictable weather. Ultimately, the best time to book your trip to Jamaica depends on your preferences for weather, budget, and crowd levels."
-        }
-      ],
-      "title": "Each month reviewed"
-  }
-  //const [stepData, setStepData] = useState(state);
+  const [modules, setModules] = useState([]);
   const [stepData, setStepData] = useState({});
-  const serverUrl =  window.location.origin;
+  const [loading, setLoading] = useState(true); // New state for loading
+  const serverUrl = window.location.origin;
 
   // Set up axios defaults for CORS
   axios.defaults.baseURL = serverUrl;
@@ -50,6 +19,105 @@ function App() {
   // Using useRef to persist globalData across renders without causing re-renders
   const globalData = useRef({});
 
+  useEffect(() => {
+    const fetchModules = async () => {
+      // Simulate fetching module data from an API or file
+      const moduleData = [
+        {
+          order: 0,
+          name: "Main Keyword",
+          component: 'MainKeyword',
+          prerequisites: [],
+          executionTime: 0,
+          hasProgressBar: false,
+          buttonLabel: "Get Main Keyword",
+          renderProgressMessage: null
+        },
+        {
+          order: 1,
+          name: "Keyword Research",
+          component: 'KeywordResearch',
+          prerequisites: ["main_keyword"],
+          executionTime: 60, // in seconds
+          hasProgressBar: true,
+          buttonLabel: "Perform Keyword Research",
+          renderProgressMessage: {
+            5: "Analyzing Keywords...",
+            10: "Generating Keyword Variations...",
+            30: "Using AI to Categorize and Rank Keyword Variations...",
+            60: "Removing Duplicates and Contextually Similar Keyword Variations...",
+            80: "Semantically Grouping Keyword Variations...",
+            99: "Wrapping up...",
+            100: "Complete! ...But it looks like there are a few extra things to iron out, please give it a few more seconds"
+          }
+        },
+        {
+          order: 2,
+          name: "Step Three",
+          component: 'StepThree',
+          prerequisites: ["selected_articles"],
+          executionTime: 90, // in seconds
+          hasProgressBar: true,
+          buttonLabel: "Analyze Articles",
+          renderProgressMessage: null
+        },
+        {
+          order: 3,
+          name: "Step Four",
+          component: 'StepFour',
+          prerequisites: ["article_outline"],
+          executionTime: 45, // in seconds
+          hasProgressBar: true,
+          buttonLabel: "Generate Outline",
+          renderProgressMessage: null
+        },
+        {
+          order: 4,
+          name: "Step Five",
+          component: 'StepFive',
+          prerequisites: ["draft_content"],
+          executionTime: 180, // in seconds
+          hasProgressBar: true,
+          buttonLabel: "Create Draft",
+          renderProgressMessage: null
+        },
+        {
+          order: 5,
+          name: "Step Six",
+          component: 'StepSix',
+          prerequisites: ["final_content"],
+          executionTime: 120, // in seconds
+          hasProgressBar: true,
+          buttonLabel: "",
+          renderProgressMessage: null
+        },
+        {
+          order: 6,
+          name: "Step Seven",
+          component: 'StepSeven',
+          prerequisites: ["published_article"],
+          executionTime: 60, // in seconds
+          hasProgressBar: true,
+          buttonLabel: "Finalize Content",
+          renderProgressMessage: null
+        }
+      ];
+
+      // Dynamically import the components
+      const importedModules = await Promise.all(
+        moduleData.map(async (module) => {
+          const component = await import(`./modules/${module.component}`);
+          return { ...module, component: component.default };
+        })
+      );
+
+      setModules(importedModules);
+      setLoading(false); // Set loading to false after modules are fetched
+    };
+
+    fetchModules();
+  }, []);
+
   const callApiForStep = async (step, params) => {
     let endpoint = '';
     let callApi = true;
@@ -57,15 +125,15 @@ function App() {
     switch (step) {
       case 1:
         endpoint = '/api/keygen';
-        if(params.input_keyword) {
-          globalData.current = { 
+        if (params.input_keyword) {
+          globalData.current = {
             input_keyword: params.input_keyword,
             country: params.country,
             additional_keywords: params.additional_keywords
           };
         }
-        if((!params.input_keyword || params.input_keyword.trim() === '') 
-        && (!globalData.current.input_keyword || globalData.current.input_keyword.trim() === '')) {
+        if ((!params.input_keyword || params.input_keyword.trim() === '') &&
+          (!globalData.current.input_keyword || globalData.current.input_keyword.trim() === '')) {
           console.error('Keyword is required for SerpScrape');
           return;
         }
@@ -73,20 +141,20 @@ function App() {
       case 2:
         endpoint = '/api/serpscrape';
         // Ensure input_keyword is not empty or undefined
-        if(params.input_keyword) {
+        if (params.input_keyword) {
           globalData.current.input_keyword = params.input_keyword;
         }
 
-        if((!params.input_keyword || params.input_keyword.trim() === '') 
-        && (!globalData.current.input_keyword || globalData.current.input_keyword.trim() === '')) {
+        if ((!params.input_keyword || params.input_keyword.trim() === '') &&
+          (!globalData.current.input_keyword || globalData.current.input_keyword.trim() === '')) {
           console.error('Keyword is required for SerpScrape');
           return;
         }
         break;
       case 3:
         endpoint = '/api/headerscrape';
-        
-        if(params.selected_articles) {
+
+        if (params.selected_articles) {
           globalData.current.selected_articles = params.selected_articles;
         }
         console.log("params headerscrape", params);
@@ -107,7 +175,6 @@ function App() {
         break;
       case 5:
         endpoint = '/api/articlebrief';
-        callApi = false;
         break;
       case 6:
         endpoint = '/api/outlinegen';
@@ -120,30 +187,30 @@ function App() {
         return;
     }
 
-    
-      console.log("Api: " + endpoint + " called with params", globalData.current);
-      try {
-        // Append contents of params to globalData.current with its own key
-        Object.entries(params).forEach(([key, value]) => {
+
+    console.log("Api: " + endpoint + " called with params", globalData.current);
+    try {
+      // Append contents of params to globalData.current with its own key
+      Object.entries(params).forEach(([key, value]) => {
+        globalData.current[key] = value;
+      });
+      if (callApi) {
+        let response = await axios.post(endpoint, globalData.current);
+        // Append contents of response.data.results to globalData.current with its own key
+        Object.entries(response.data.results).forEach(([key, value]) => {
           globalData.current[key] = value;
         });
-        if (callApi) {
-          let response = await axios.post(endpoint, globalData.current);
-          // Append contents of response.data.results to globalData.current with its own key
-          Object.entries(response.data.results).forEach(([key, value]) => {
-            globalData.current[key] = value;
-          });
-          setStepData(response.data.results);
-          console.log("response", response);
-        }
-
-
-      } catch (error) {
-        console.error(`Axios Failed to call API for step ${step}, ${endpoint}`, error);
-        return;
+        setStepData(response.data.results);
+        console.log("response", response);
       }
-      console.log("GlobalData", globalData.current);
-      setCurrentStep(step);
+
+
+    } catch (error) {
+      console.error(`Axios Failed to call API for step ${step}, ${endpoint}`, error);
+      return;
+    }
+    console.log("GlobalData", globalData.current);
+    setCurrentStep(step);
   };
 
   const nextStep = (params) => {
@@ -162,19 +229,31 @@ function App() {
 
   return (
     <div className="App">
-      <div className="min-h-screen bg-gray-100 flex flex-col justify-center">
-        <div className="max-w-xl mx-auto p-8 bg-white border border-gray-300 rounded-lg shadow-lg text-left">
-          {currentStep === 0 && <StepOne nextStep={nextStep} stepData={stepData} />}
-          {currentStep === 1 && <StepTwo prevStep={prevStep} nextStep={nextStep} stepData={stepData} />}
-          {currentStep === 2 && <StepThree prevStep={prevStep} nextStep={nextStep} stepData={stepData} />}
-          {currentStep === 3 && <StepFour prevStep={prevStep} nextStep={nextStep} stepData={stepData} />}
-          {currentStep === 4 && <StepFive prevStep={prevStep} nextStep={nextStep} stepData={stepData} />}
-          {currentStep === 5 && <ArticleBrief prevStep={prevStep} nextStep={nextStep} stepData={stepData} />}
-          {currentStep === 6 && <StepSix prevStep={prevStep} nextStep={nextStep} stepData={stepData} />}
-          {currentStep === 7 && <StepSeven prevStep={prevStep} nextStep={nextStep} stepData={stepData} />}
-          {/* Add additional steps here */}
+      <div className="min-h-screen bg-gray-100 flex flex-col">
+        <h1 className="text-3xl font-bold mt-3 self-center">ContentScribe</h1>
+        <div className="flex-grow flex items-center justify-center">
+          <div className="max-w-xl mx-auto p-8 bg-white border border-gray-300 rounded-lg shadow-lg text-left">
+            {loading ? (
+              <div className="flex justify-center items-center">
+                <svg className="animate-spin h-10 w-10 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+              </div>
+            ) : (
+              modules.map((module, index) => (
+                currentStep === index && React.createElement(module.component, {
+                  prevStep: prevStep,
+                  nextStep: nextStep,
+                  stepData: stepData,
+                  nextModule: modules.find(mod => mod.order === index + 1)
+                })
+              ))
+            )}
+          </div>
         </div>
       </div>
+
       {Object.keys(globalData.current).length > 0 && (
         <div style={{ textAlign: 'left' }}>
           Context Data:

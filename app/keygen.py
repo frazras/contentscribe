@@ -20,6 +20,10 @@ API_KEY_B = os.getenv('API_KEY_B',API_KEY)
 BASE_URL = os.getenv('BASE_URL', 'https://api.openai.com/v1')
 BASE_URL_B = os.getenv('BASE_URL_B', BASE_URL)
 
+PERPLEXITY_MODEL = os.getenv('PERPLEXITY_MODEL', 'llama-3-sonar-large-32k-chat')
+PERPLEXITY_API_KEY = os.getenv('PERPLEXITY_API_KEY', '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')
+PERPLEXITY_BASE_URL = os.getenv('PERPLEXITY_BASE_URL', 'https://api.perplexity.ai')
+
 async def get_keyword_data(input_keyword, input_country):
     # Get results
     print("GETTTING KEY WORDS")
@@ -119,7 +123,7 @@ async def suggestions_ai_analysis_headings(heading_data: str):
 
     return {}
 
-async def title_gen_ai_analysis(context_data: str):
+async def title_gen_ai_analysis(context_data: dict):
     max_retries = 5
     #convert json to dict
     print("ANALYZING data for title gen")
@@ -161,7 +165,7 @@ async def title_gen_ai_analysis(context_data: str):
 
     return {}
 
-async def outline_gen_ai_analysis(context_data: str):
+async def outline_gen_ai_analysis(context_data: dict):
     max_retries = 5
     print("ANALYZING data for outline gen")
     selected_articles = [article['title'] for article in context_data.get('selected_articles')]
@@ -170,7 +174,8 @@ async def outline_gen_ai_analysis(context_data: str):
     title = context_data.get('customTitle') or context_data.get('selectedTitle')
     input_keyword = context_data.get('input_keyword')
     context = context_data.get('context')
-    article_brief = context_data.get('articleBrief')
+    article_brief = context_data.get('articleBrief', {}).get('content_brief')
+    user_prompt = context_data.get('articleBrief', {}).get('user_prompt')
     print("retrieved variables")
     for _ in range(max_retries):
         try:
@@ -183,7 +188,8 @@ async def outline_gen_ai_analysis(context_data: str):
                 SELECTED_KEYWORDS=selected_keywords,
                 TITLE=title,
                 CONTEXT=context,
-                ARTICLE_BRIEF=article_brief
+                ARTICLE_BRIEF=article_brief,
+                USER_PROMPT=user_prompt
             )
             print("awaiting Ai OUTLINE")
             print(prompt)
@@ -204,7 +210,7 @@ async def outline_gen_ai_analysis(context_data: str):
             )
     return {}
 
-async def article_gen_ai_analysis(context_data: str):
+async def article_gen_ai_analysis(context_data: dict):
     max_retries = 5
     print("ANALYZING data for article gen")
     selected_headings = context_data.get('selected_headings')
@@ -214,7 +220,8 @@ async def article_gen_ai_analysis(context_data: str):
     input_keyword = context_data.get('input_keyword')
     article_outline = context_data.get('outline')
     context = context_data.get('context')
-    article_brief = context_data.get('articleBrief')
+    article_brief = context_data.get('articleBrief', {}).get('content_brief')
+    user_prompt = context_data.get('articleBrief', {}).get('user_prompt')
     article_content = []
 
     for section in article_outline:
@@ -233,7 +240,8 @@ async def article_gen_ai_analysis(context_data: str):
                         SUB_HEADERS=sub_headers,
                         OUTLINE=article_outline,
                         CONTEXT=context,
-                        ARTICLE_BRIEF=article_brief
+                        ARTICLE_BRIEF=article_brief,
+                        USER_PROMPT=user_prompt
                     )
                     print("awaiting Ai ARTICLE")
                     print(prompt)
@@ -370,3 +378,53 @@ async def combine_headings(urls):
     # Convert set to list if necessary, or process as needed
     print(f"Combined headings: {all_headings}")
     return all_headings
+
+async def invoke_perplexity(prompt):
+    response = await generate_response(
+        user_prompt=prompt,
+        model=PERPLEXITY_MODEL,
+        api_key=PERPLEXITY_API_KEY,
+        base_url=PERPLEXITY_BASE_URL
+    )
+    return response
+
+async def perplexity_ai_analysis(context_data: dict):
+    print("PERPLEXITY")
+    max_retries = 5
+    selected_headings = context_data.get('selected_headings', [])
+    selected_articles = [article['title'] for article in context_data.get('selected_articles', [])]
+    selected_keywords = context_data.get('selected_keywords', [])
+    title = context_data.get('customTitle') or context_data.get('selectedTitle', '')
+    input_keyword = context_data.get('input_keyword', '')
+    context = context_data.get('context', '')
+    article_brief = context_data.get('articleBrief', {}).get('content_brief')
+    user_prompt = context_data.get('articleBrief', {}).get('user_prompt')
+
+    print("Context Data:", context_data)  # Log the context data
+
+    for _ in range(max_retries):
+        try:
+            print("FORMATTING PROMPT")
+            prompt = perplexity_gen.format(
+                INPUT_KEYWORD=input_keyword,
+                SELECTED_ARTICLES=selected_articles,
+                SELECTED_HEADINGS=selected_headings,
+                SELECTED_KEYWORDS=selected_keywords,
+                TITLE=title,
+                CONTEXT=context,
+                ARTICLE_BRIEF=article_brief,
+                USER_PROMPT=user_prompt
+            )
+            print("PROMPT")
+            print(prompt)
+            response = await invoke_perplexity(prompt)
+            if response:
+                try:
+                    return json_repair.loads(response)
+                except json.JSONDecodeError as e:
+                    print(f"JSON decoding failed: {str(e)} - Response was: '{response}'")
+                    return {}
+        except Exception as e:
+            print(f"Failed to generate analysis for suggestion ai outline. Exception type: {type(e).__name__}, Message: {str(e)}")
+        
+    return {}
