@@ -11,6 +11,17 @@ function MainKeyword({ nextStep, stepData, nextModule }) {
     setIsInputKeywordValid(!!event.target.value.trim());
   };
 
+  const calculateExecutionTime = (keyword) => {
+    const wordCount = keyword.trim().split(/\s+/).length;
+    if (wordCount <= 2) {
+      return 120; // 2 minutes
+    } else if (wordCount <= 4) {
+      return 60; // 1 minute
+    } else {
+      return 30; // 30 seconds
+    }
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault(); // Prevent default form submission behavior
     if (!inputKeyword.trim()) {
@@ -18,7 +29,8 @@ function MainKeyword({ nextStep, stepData, nextModule }) {
       return;
     }
     setIsSubmitting(true);
-    nextStep({ input_keyword: inputKeyword, country: 'US' });
+    const executionTime = calculateExecutionTime(inputKeyword);
+    nextStep({ input_keyword: inputKeyword, country: 'US' }, executionTime);
   };
 
   return (

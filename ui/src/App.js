@@ -213,11 +213,21 @@ function App() {
     setCurrentStep(step);
   };
 
-  const nextStep = (params) => {
+  const nextStep = (params, executionTime) => {
     const nextStepNumber = currentStep + 1;
     callApiForStep(nextStepNumber, params);
     console.log("nextStepNumber", nextStepNumber);
-    return;
+    
+    // Update the next module's execution time
+    const updatedModules = [...modules];
+    const nextModuleIndex = updatedModules.findIndex(mod => mod.order === nextStepNumber);
+    if (nextModuleIndex !== -1) {
+      updatedModules[nextModuleIndex] = {
+        ...updatedModules[nextModuleIndex],
+        executionTime: executionTime || updatedModules[nextModuleIndex].executionTime
+      };
+      setModules(updatedModules);
+    }
   };
 
   const prevStep = () => {
