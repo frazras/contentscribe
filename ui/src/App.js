@@ -243,6 +243,7 @@ function App() {
             ) : (
               modules.map((module, index) => (
                 currentStep === index && React.createElement(module.component, {
+                  key: module.order, // Add unique key prop
                   prevStep: prevStep,
                   nextStep: nextStep,
                   stepData: stepData,

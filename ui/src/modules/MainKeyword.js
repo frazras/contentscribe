@@ -54,8 +54,8 @@ function MainKeyword({ nextStep, stepData, nextModule }) {
       </form>
       {isSubmitting && (
         <>
-          {nextModule.hasProgressBar&& (
-            <ProgressBar executionTime={nextModule.executionTime} renderProgressMessage={() => nextModule.renderProgressMessage} />
+          {nextModule.hasProgressBar && (
+            <ProgressBar executionTime={nextModule.executionTime} renderProgressMessage={nextModule.renderProgressMessage} />
           )}
         </>
       )}
