@@ -1,51 +1,26 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
+import ProgressBar from '../lib/Progressbar';
 
-function StepFour({ nextStep, stepData }) {
+function Headings({ nextStep, stepData, nextModule }) {
   const [selectedHeadings, setSelectedHeadings] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const [bars, setBars] = useState("░");
-  const progressInterval = useRef(null);
 
   useEffect(() => {
     console.log('Headings Stepdata on load:', stepData)
   }, [stepData]);
 
   const handleHeadingChange = (heading) => {
-    if (selectedHeadings.includes(heading)) {
-      setSelectedHeadings(selectedHeadings.filter(h => h !== heading));
-    } else {
-      setSelectedHeadings([...selectedHeadings, heading]);
-    }
+    setSelectedHeadings(prevHeadings => 
+      prevHeadings.includes(heading)
+        ? prevHeadings.filter(h => h !== heading)
+        : [...prevHeadings, heading]
+    );
   };
   
   const handleSubmit = async () => {
     setIsSubmitting(true);
-    initProgressBar();
     await nextStep({selected_headings: selectedHeadings});
   };
-
-  const initProgressBar = () => {
-    let intervalDuration = 200; // 50 seconds for demo purposes
-    progressInterval.current = setInterval(() => {
-      setProgress((prevProgress) => {
-        const newProgress = prevProgress < 100 ? prevProgress + 1 : 100;
-        if (newProgress === 100) {
-          clearInterval(progressInterval.current);
-          setBars("░".repeat(41)); // Assuming 41 bars represent 100%
-          console.log("progress complete");
-        } else if (newProgress % 5 === 0) {
-          setBars((prevBars) => prevBars + "░░");
-          console.log("progress", newProgress);
-        }
-        return newProgress;
-      });
-    }, intervalDuration);
-  };
-
-  useEffect(() => {
-    return () => clearInterval(progressInterval.current);
-  }, []);
 
   return (
     <div>
@@ -81,21 +56,17 @@ function StepFour({ nextStep, stepData }) {
               </svg>
               Processing...
             </div>
-          ) : 'Next: Generate Titles'}
+          ) : nextModule.buttonLabel}
         </button>
       </div>
-      {isSubmitting && (
-        <>
-          <div className="mt-5">
-            <div className="progress-bar">
-              <div className="bg-blue-500 h-1" style={{ width: `${progress}%` }}></div>
-              {bars}{progress}%
-            </div>
-          </div>
-        </>
+      {isSubmitting && nextModule.hasProgressBar && (
+        <ProgressBar 
+          executionTime={nextModule.executionTime} 
+          renderProgressMessage={nextModule.renderProgressMessage} 
+        />
       )}
     </div>
   );
 }
 
-export default StepFour;
+export default Headings;

@@ -1,29 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import ClipboardJS from 'clipboard';
 
-function StepSeven({ nextStep, stepData }) {
-  const [selectedHeadings, setSelectedHeadings] = useState([]);
-  const [validationError, setValidationError] = useState(false);
-
+function ArticleGeneration({ stepData }) {
   useEffect(() => {
-    console.log('Headings Stepdata on load:', stepData)
+    console.log('Article Generation Stepdata on load:', stepData);
   }, [stepData]);
-
-  const handleHeadingChange = (heading) => {
-    if (selectedHeadings.includes(heading)) {
-      setSelectedHeadings(selectedHeadings.filter(h => h !== heading));
-    } else {
-      setSelectedHeadings([...selectedHeadings, heading]);
-    }
-  };
-  
-  const handleSubmit = async () => {
-    if (selectedHeadings.length === 0) {
-      setValidationError(true);
-      return;
-    }
-    await nextStep({selected_headings: selectedHeadings});
-  };
 
   useEffect(() => {
     const clipboard = new ClipboardJS('.copy-btn', {
@@ -71,4 +52,4 @@ function StepSeven({ nextStep, stepData }) {
   );
 }
 
-export default StepSeven;
+export default ArticleGeneration;

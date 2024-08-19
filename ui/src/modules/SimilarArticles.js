@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import ProgressBar from '../lib/Progressbar';
 
-function StepThree({ nextStep, stepData }) {
+function SimilarArticles({ nextStep, stepData, nextModule }) {
   const [selectedArticles, setSelectedArticles] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false); // Added state to track submission status
   const [validationError, setValidationError] = useState(false); // State to handle validation error
@@ -67,12 +68,14 @@ function StepThree({ nextStep, stepData }) {
               </svg>
               Processing...
             </div>
-          ) :  'Review Headings'}
+          ) : nextModule.buttonLabel}
         </button>
       </div>
+      {isSubmitting && nextModule.hasProgressBar && (
+        <ProgressBar executionTime={nextModule.executionTime} renderProgressMessage={nextModule.renderProgressMessage} />
+      )}
     </div>
   );
 }
 
-export default StepThree;
-
+export default SimilarArticles;

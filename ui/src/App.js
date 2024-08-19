@@ -2,7 +2,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import './App.css'; // This now imports Tailwind CSS
 import axios from 'axios'; // Import axios for API calls
-import { JsonView, allExpanded, darkStyles, defaultStyles } from 'react-json-view-lite';
+import { JsonView, darkStyles } from 'react-json-view-lite';
 import 'react-json-view-lite/dist/index.css';
 
 function App() {
@@ -37,7 +37,7 @@ function App() {
           order: 1,
           name: "Keyword Research",
           component: 'KeywordResearch',
-          prerequisites: ["main_keyword"],
+          prerequisites: ["MainKeyword"],
           executionTime: 60, // in seconds
           hasProgressBar: true,
           buttonLabel: "Perform Keyword Research",
@@ -53,9 +53,9 @@ function App() {
         },
         {
           order: 2,
-          name: "Step Three",
-          component: 'StepThree',
-          prerequisites: ["selected_articles"],
+          name: "Research Similar Articles",
+          component: 'SimilarArticles',
+          prerequisites: ["KeywordResearch"],
           executionTime: 90, // in seconds
           hasProgressBar: true,
           buttonLabel: "Analyze Articles",
@@ -63,42 +63,42 @@ function App() {
         },
         {
           order: 3,
-          name: "Step Four",
-          component: 'StepFour',
-          prerequisites: ["article_outline"],
+          name: "Select Headings",
+          component: 'Headings',
+          prerequisites: ["SimilarArticles"],
           executionTime: 45, // in seconds
           hasProgressBar: true,
-          buttonLabel: "Generate Outline",
+          buttonLabel: "Select Headings",
           renderProgressMessage: null
         },
         {
           order: 4,
-          name: "Step Five",
-          component: 'StepFive',
-          prerequisites: ["draft_content"],
+          name: "Titles",
+          component: 'Titles',
+          prerequisites: ["Headings"],
           executionTime: 180, // in seconds
           hasProgressBar: true,
-          buttonLabel: "Create Draft",
+          buttonLabel: "Select a Title",
           renderProgressMessage: null
         },
         {
           order: 5,
-          name: "Step Six",
-          component: 'StepSix',
-          prerequisites: ["final_content"],
+          name: "Article Outline",
+          component: 'ArticleOutline',
+          prerequisites: ["Titles"],
           executionTime: 120, // in seconds
           hasProgressBar: true,
-          buttonLabel: "",
+          buttonLabel: "Generate Article Outline",
           renderProgressMessage: null
         },
         {
           order: 6,
-          name: "Step Seven",
-          component: 'StepSeven',
-          prerequisites: ["published_article"],
+          name: "Article Generation",
+          component: 'ArticleGeneration',
+          prerequisites: ["ArticleOutline"],
           executionTime: 60, // in seconds
           hasProgressBar: true,
-          buttonLabel: "Finalize Content",
+          buttonLabel: "Generate Article",
           renderProgressMessage: null
         }
       ];
