@@ -1,24 +1,26 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Clipboard from 'clipboard/dist/clipboard.min.js'; // Ensure correct import for Clipboard
-import axios from 'axios';
 
 function ArticleGeneration({ nextStep, globalData }) {
   const [articleContent, setArticleContent] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState('');
   const abortControllerRef = useRef(null);
+  const articleContentRef = useRef(null); // Reference to the article content div
+  const [autoScroll, setAutoScroll] = useState(true); // State to control auto-scrolling
+
+  const appendArticleContent = useCallback((newContent) => {
+    setArticleContent(prevContent => prevContent + newContent);
+  }, []);
 
   const handleGenerateArticle = async () => {
-    console.log('handleGenerateArticle');
     if (!isGenerating) {
-      console.log('handleGenerateArticle 2');
       setIsGenerating(true);
       setError('');
       setArticleContent('');
       abortControllerRef.current = new AbortController();
       
       try {
-        console.log('handleGenerateArticle 3b');
         const response = await fetch(`/api/articlegen`, {
           method: 'POST',
           headers: {
@@ -32,24 +34,24 @@ function ArticleGeneration({ nextStep, globalData }) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        console.log('handleGenerateArticle 3c');
         const reader = response.body.getReader();
         const decoder = new TextDecoder();
 
         while (true) {
           const { done, value } = await reader.read();
-          if (done) break;
-          const chunk = decoder.decode(value);
-          console.log('Received chunk:', chunk);
-          setArticleContent(prevContent => prevContent + chunk);
+          if (done) {
+            break;
+          }
+          const chunk = decoder.decode(value, { stream: true });
+          appendArticleContent(chunk);
+          // Scroll to the bottom of the article content if autoScroll is enabled
+          if (autoScroll && articleContentRef.current) {
+            articleContentRef.current.scrollTop = articleContentRef.current.scrollHeight;
+          }
         }
       } catch (err) {
-        if (err.name === 'AbortError') {
-          console.log('Request canceled:', err.message);
-        } else {
-          setError('An error occurred while generating the article.');
-          console.error('Error generating article:', err);
-        }
+        console.error('Error in handleGenerateArticle:', err);
+        setError(`An error occurred: ${err.message}`);
       } finally {
         setIsGenerating(false);
       }
@@ -60,9 +62,18 @@ function ArticleGeneration({ nextStep, globalData }) {
     }
   };
 
-  useEffect(() => {
-    console.log('Article Generation globalData on load:', globalData.current);
+  const handleScroll = () => {
+    const { scrollTop, scrollHeight, clientHeight } = articleContentRef.current;
+    // Check if the user has scrolled near the bottom
+    if (scrollHeight - scrollTop <= clientHeight + 10) {
+      setAutoScroll(true); // Enable auto-scrolling
+    } else {
+      setAutoScroll(false); // Disable auto-scrolling
+    }
+  };
 
+  useEffect(() => {
+    handleGenerateArticle(); // Run handleGenerateArticle on page load
     return () => {
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
@@ -90,9 +101,12 @@ function ArticleGeneration({ nextStep, globalData }) {
 
   return (
     <div>
-      <h1 className="text-2xl font-semibold mb-4">{globalData.current?.customTitle || globalData.current?.selectedTitle}</h1>
       
-      <div className="overflow-y-scroll h-96 border border-gray-300 rounded px-4 py-2 mb-4 article-content">
+      <div 
+        className="overflow-y-scroll h-96 border border-gray-300 rounded px-4 py-2 mb-4 article-content"
+        ref={articleContentRef} // Attach the ref to the div
+        onScroll={handleScroll} // Attach scroll event handler
+      >
         <div dangerouslySetInnerHTML={{ __html: articleContent }} />
         {isGenerating && <p>Generating article...</p>}
         {error && <p className="text-red-500">{error}</p>}
@@ -114,7 +128,7 @@ function ArticleGeneration({ nextStep, globalData }) {
         className="bg-yellow-500 text-white px-4 py-2 rounded mt-4"
         onClick={handleGenerateArticle}
       >
-        Start Generation
+        {isGenerating ? 'Stop Generation' : 'Start Generation'}
       </button>
     </div>
   );

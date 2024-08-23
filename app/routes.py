@@ -1,64 +1,61 @@
-import logging
-from flask import Blueprint, request, jsonify, Response, stream_with_context
+from fastapi import APIRouter, Request, Response, HTTPException
+from fastapi.responses import JSONResponse, StreamingResponse
+import asyncio
 import json
 from .keygen import get_keyword_data, combine_headings, title_gen_ai_analysis, outline_gen_ai_analysis, article_gen_ai_analysis, perplexity_ai_analysis, invoke_perplexity
+from .llm import generate_response_stream
 import requests
 from tavily import TavilyClient
-import asyncio
-
 import os
 from dotenv import load_dotenv
 
 # Load environment variables from .env file
 load_dotenv()
 
+# Access variables securely
+LLM_MODEL = os.getenv('LLM_MODEL', 'gpt-4o')  # Smart AI
+LLM_MODEL_B = os.getenv('LLM_MODEL_B', 'gpt-3.5-turbo')  # Fast AI
+API_KEY = os.getenv('API_KEY')
+API_KEY_B = os.getenv('API_KEY_B',API_KEY)
+BASE_URL = os.getenv('BASE_URL', 'https://api.openai.com/v1')
+BASE_URL_B = os.getenv('BASE_URL_B', BASE_URL)
+
+router = APIRouter()
 
 url = "https://google.serper.dev/search"
-main = Blueprint('main', __name__)
 
-@main.route('/', methods=['GET'])
-def index():
-    return jsonify({"message": "Welcome to the API"}), 200
+@router.get('/')
+async def index():
+    return {"message": "Welcome to the API"}
 
-@main.route('/api', methods=['GET'])
-def api_root():
-    return jsonify({"message": "API Root"}), 200
+@router.get('/api')
+async def api_root():
+    return {"message": "API Root"}
 
-@main.route('/keygen', methods=['POST'])
-async def generate_keywords():
-    if not request.is_json:
-        return jsonify({"error": "Bad Request", "message": "The browser (or proxy) sent a request that this server could not understand."}), 400
-    
-    data = request.json
+@router.post('/keygen')
+async def generate_keywords(request: Request):
+    data = await request.json()
     input_keyword = data.get('input_keyword')
     if not input_keyword:
-        return jsonify({"error": "Bad Request", "message": "Keyword is required."}), 400
+        raise HTTPException(status_code=400, detail="Keyword is required.")
     
     country = data.get('country', 'US')
     
-
     try:
         keyword_data = await get_keyword_data(input_keyword, country)
     except Exception as e:
-        return jsonify({"error": "Server Error", "message": str(e)}), 500
+        raise HTTPException(status_code=500, detail=str(e))
     
-    return jsonify(keyword_data)
+    return keyword_data
 
-@main.route('/serpscrape', methods=['POST'])
-async def generate_title():
-    if not request.is_json:
-        return jsonify({"error": "Bad Request", "message": "The browser (or proxy) sent a request that this server could not understand."}), 400
-    
-    data = request.json
-    print(data)
+@router.post('/serpscrape')
+async def generate_title(request: Request):
+    data = await request.json()
     input_keyword = data.get('input_keyword')
     if not input_keyword:
-        print("No input_keyword")
-        return jsonify({"error": "Bad Request", "message": "Keyword is required."}), 400
+        raise HTTPException(status_code=400, detail="Keyword is required.")
     
     country = data.get('country', 'US')
-    if not country:
-        return jsonify({"error": "Bad Request", "message": "Country is required."}), 400
     
     payload = json.dumps({
         "q": input_keyword,
@@ -69,7 +66,7 @@ async def generate_title():
         'Content-Type': 'application/json'
     }
 
-    response = requests.request("POST", url, headers=headers, data=payload)
+    response = requests.post(url, headers=headers, data=payload)
     
     if response.status_code == 200:
         results_data = response.json()
@@ -87,144 +84,79 @@ async def generate_title():
             extracted_data.append({'title': title, 'position': position, 'url': urllink})
         results = extracted_data
     else:
-        results = {'error': 'Failed to fetch data', 'status_code': response.status_code}
+        raise HTTPException(status_code=response.status_code, detail="Failed to fetch data")
 
     tavily = TavilyClient(api_key=os.getenv('TAVILY_API_KEY'))
     
     try:
-        response = tavily.search(query=input_keyword, search_depth="advanced")
+        tavily_response = tavily.search(query=input_keyword, search_depth="advanced")
     except requests.exceptions.HTTPError as e:
-        logging.error(f"HTTPError: {e.response.status_code} - {e.response.text}")
-        return jsonify({"error": "Failed to fetch data from Tavily", "details": e.response.text}), 500
+        raise HTTPException(status_code=500, detail=f"Failed to fetch data from Tavily: {e.response.text}")
     
-    # Log the response object to debug its structure
-    logging.debug(f"Response object: {response}")
-    
-    # Ensure response has 'results' attribute
-    if 'results' not in response:
-        logging.error("Response object does not contain 'results'")
-        return jsonify({"error": "Invalid response structure"}), 500
+    context = tavily_response['results']
 
-    context = response['results']
-    # context = [{"url": obj["url"], "content": obj["content"]} for obj in response['results']]
-
-    result = {
+    return {
         "success": True,
         "results": {
             "serp": results,
             "context": context
         }
     }
-    return jsonify(result)
 
-@main.route('/headerscrape', methods=['POST'])
-async def serp_scan():
-    if not request.is_json:
-        return jsonify({"error": "Bad Request", "message": "The browser (or proxy) sent a request that this server could not understand."}), 400
-    print("GOT REQUESTed")
-    data = request.json
-    print("GOT DATA")
-    print(data)
+@router.post('/headerscrape')
+async def serp_scan(request: Request):
+    data = await request.json()
     links = data.get('selected_articles')
-    print("GOT LINKS")
-    print(links)
     if not links:
-        return jsonify({"error": "Bad Request", "message": "Links are required."}), 400
-    # create data structure suggestions.data.suggestions.headings to store headings
+        raise HTTPException(status_code=400, detail="Links are required.")
+    
     results = {
         "headings": await combine_headings(links)
     }
 
-    return jsonify({"success": True, "results": results})
+    return {"success": True, "results": results}
 
-@main.route('/newtitlegen', methods=['POST'])
-async def new_title_gen():
-    if not request.is_json:
-        return jsonify({"error": "Bad Request", "message": "The browser (or proxy) sent a request that this server could not understand."}), 400
-    print("GOT REQUEST...")
-    data = request.json
-    print("GOT DATA")
-    #print(data)
+@router.post('/newtitlegen')
+async def new_title_gen(request: Request):
+    data = await request.json()
     titles = await title_gen_ai_analysis(data)
-    print("GOT TITLES")
-    print(titles)
-    return jsonify({"success": True, "results": titles})
+    return {"success": True, "results": titles}
 
-@main.route('/outlinegen', methods=['POST'])
-async def outline_gen():
-    print("GOT REQUEST-----")
-    data = request.json
-    print("GOT DATA", data)
+@router.post('/outlinegen')
+async def outline_gen(request: Request):
+    data = await request.json()
     outline = await outline_gen_ai_analysis(data)
-    print("GOT OUTLINE", outline)
-    return jsonify({"success": True, "results": outline})
+    return {"success": True, "results": outline}
 
-@main.route('/articlegen', methods=['POST'])
-def article_gen():
-    print("Preparing article generation")
-    if not request.is_json:
-        return jsonify({"error": "Bad Request", "message": "The browser (or proxy) sent a request that this server could not understand."}), 400
-    print("GOT DATA")
-    data = request.json
+@router.post('/articlegen')
+async def article_gen(request: Request):
+    print("Received articlegen request")
+    try:
+        data = await request.json()
+        print("Request data:", data)
+    except Exception as e:
+        print("Error parsing request JSON:", str(e))
+        raise HTTPException(status_code=400, detail="Invalid JSON in request body")
+
+    if not data:
+        raise HTTPException(status_code=400, detail="Request body is empty")
 
     async def generate():
-        print("Starting generate")
-        async for chunk in article_gen_ai_analysis(data):
-            print(f"Received chunk: {chunk}")
-            words = chunk.split()
-            for i in range(0, len(words), 5):
-                mini_chunk = ' '.join(words[i:i+5])
-                print(f"Yielding mini_chunk: {mini_chunk}")
-                yield mini_chunk + ' '
-                yield '\n'
-
-    def stream():
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
         try:
-            async_gen = generate()
-            while True:
-                try:
-                    chunk = loop.run_until_complete(async_gen.__anext__())
-                    print(f"Yielding to Flask!: {chunk}")
-                    yield chunk
-                    yield ''  # This empty string forces a flush
-                except StopAsyncIteration:
-                    print("StopAsyncIteration")
-                    break
-        finally:
-            print("Closing loop")
-            loop.close()
+            print("Starting article generation")
+            async for chunk in article_gen_ai_analysis(data):
+                print("Yielding chunk:", chunk)
+                yield chunk.encode('utf-8')
+            print("Article generation complete")
+        except Exception as e:
+            print(f"Error in article generation: {str(e)}")
+            yield f"Error: {str(e)}".encode('utf-8')
 
-    print("Returning Response")
-    return Response(stream_with_context(stream()), mimetype='text/plain')
+    print("Returning StreamingResponse")
+    return StreamingResponse(generate(), media_type='text/plain')
 
-@main.route('/articlebrief', methods=['POST'])
-async def article_brief():
-    if not request.is_json:
-        return jsonify({"error": "Bad Request", "message": "The browser (or proxy) sent a request that this server could not understand."}), 400
-    print("GOT REQUEST")
-    data = request.json
-    print("GOT DATA")
-    print(data)
+@router.post('/articlebrief')
+async def article_brief(request: Request):
+    data = await request.json()
     brief = await perplexity_ai_analysis(data)
-    print("GOT BRIEF")
-    print(brief)
-    return jsonify({"success": True, "results": brief})
-
-@main.route('/test-perplexity', methods=['POST'])
-async def test_perplexity():
-    if not request.is_json:
-        return jsonify({"error": "Bad Request", "message": "The request must be JSON"}), 400
-    
-    data = request.json
-    prompt = data.get('prompt')
-    
-    if not prompt:
-        return jsonify({"error": "Bad Request", "message": "Prompt is required"}), 400
-    
-    try:
-        response = await invoke_perplexity(prompt)
-        return jsonify({"success": True, "response": response})
-    except Exception as e:
-        return jsonify({"error": "Server Error", "message": str(e)}), 500
+    return {"success": True, "results": brief}

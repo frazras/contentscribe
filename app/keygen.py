@@ -212,19 +212,23 @@ async def outline_gen_ai_analysis(context_data: dict):
 
 async def article_gen_ai_analysis(context_data: dict):
     print("ANALYZING data for article gen")
-    context_data = context_data.get('data')
-    selected_headings = context_data.get('selected_headings', [])
-    selected_articles = [article['title'] for article in context_data.get('selected_articles', [])]
-    selected_keywords = context_data.get('selected_keywords', [])
-    title = context_data.get('customTitle') or context_data.get('selectedTitle', '')
-    input_keyword = context_data.get('input_keyword', '')
-    article_outline = context_data.get('outline', [])
-    context = context_data.get('context', '')
-    article_brief = context_data.get('articleBrief', {}).get('content_brief', '')
-    user_prompt = context_data.get('userPrompt', '')
-   #print all keys in context_data
+    if not context_data:
+        raise ValueError("context_data is None or empty")
+    
+    data = context_data
+    selected_headings = data.get('selected_headings', [])
+    selected_articles = [article['title'] for article in data.get('selected_articles', [])]
+    selected_keywords = data.get('selected_keywords', [])
+    title = data.get('customTitle') or data.get('selectedTitle', '')
+    input_keyword = data.get('input_keyword', '')
+    article_outline = data.get('outline', [])
+    context = data.get('context', '')
+    article_brief = data.get('articleBrief', {}).get('content_brief', '')
+    user_prompt = data.get('userPrompt', '')
+   
     print("context_data keys")
-    print(context_data.keys())
+    print(data.keys())
+    
     for section in article_outline:
         print("section", section)
         for header, sub_headers in section.items():
@@ -245,13 +249,28 @@ async def article_gen_ai_analysis(context_data: dict):
                     USER_PROMPT=user_prompt
                 )
                 print("awaiting Ai ARTICLE")
-                print(prompt)
-                print("\n")
                 async for chunk in generate_response_stream(prompt, LLM_MODEL, API_KEY, BASE_URL, 0):
+                    print(chunk)
                     yield chunk
             except Exception as e:
                 print(f"Failed to generate analysis for suggestion ai article. Exception type: {type(e).__name__}, Message: {str(e)}")
+                yield f"Error: {str(e)}"
 
+async def generate_response_stream(prompt, model, api_key, base_url, temperature):
+    # Implement this function to generate the response stream
+    # This should be an async generator that yields strings
+    # For example:
+    client = AsyncOpenAI(api_key=api_key, base_url=base_url)
+    response = await client.chat.completions.create(
+        model=model,
+        messages=[{"role": "user", "content": prompt}],
+        temperature=temperature,
+        stream=True
+    )
+    async for chunk in response:
+        if chunk.choices[0].delta.content is not None:
+            yield chunk.choices[0].delta.content
+             
 async def get_suggestion_keywords_google_optimized(query, countryCode):
     # Define categorization keywords for all categories
             categories = {

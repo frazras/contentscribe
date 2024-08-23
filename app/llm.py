@@ -1,7 +1,7 @@
 from openai import AsyncOpenAI
 import asyncio
 
-MAX_RETRIES = 5
+MAX_RETRIES = 2
 
 async def generate_response(user_prompt, model, api_key, base_url="https://api.openai.com/v1", temperature=0.7):
     """
@@ -45,7 +45,7 @@ async def generate_response(user_prompt, model, api_key, base_url="https://api.o
                 return None
             
 
-async def generate_response_stream(user_prompt, model, api_key, base_url="https://api.openai.com/v1", temperature=0.7):
+async def generate_response_stream(user_prompt, model, api_key, base_url="https://api.openai.com/v1", temperature=0.7, json_response=False):
     """
     Generate a response from the AI model based on the user prompt.
 
@@ -70,13 +70,13 @@ async def generate_response_stream(user_prompt, model, api_key, base_url="https:
                 "stream": True
             }
             
-            if "openai.com" in base_url:
+            if "openai.com" in base_url and json_response:
                 api_params_stream["response_format"] = {"type": "json_object"}
             
             async for chunk in await async_openai_client.chat.completions.create(**api_params_stream):
                 if chunk.choices and chunk.choices[0].delta and chunk.choices[0].delta.content:
-                    print(f"Chunk content: {chunk.choices[0].delta.content}")
                     yield chunk.choices[0].delta.content
+            break
 
         except Exception as e:
             print("Stream exception")
@@ -87,3 +87,4 @@ async def generate_response_stream(user_prompt, model, api_key, base_url="https:
                 print(f"Response generation exception after max retries: {e}")
                 return
     print("Stream finished")
+    
