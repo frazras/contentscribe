@@ -1,0 +1,1 @@
+export const DEBUG_MODE = true; // Set this to false for production mode

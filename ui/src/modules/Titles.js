@@ -28,8 +28,7 @@ function Titles({ nextStep, stepData, nextModule }) {
       return;
     }
     setIsSubmitting(true);
-    const submissionData = useCustomTitle && customTitle ? { customTitle } : { selectedTitle };
-    await nextStep({ ...stepData, ...submissionData });
+    await nextStep({ customTitle: customTitle, selectedTitle: selectedTitle });
   };
 
   return (

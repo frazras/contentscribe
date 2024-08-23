@@ -175,7 +175,7 @@ async def outline_gen_ai_analysis(context_data: dict):
     input_keyword = context_data.get('input_keyword')
     context = context_data.get('context')
     article_brief = context_data.get('articleBrief', {}).get('content_brief')
-    user_prompt = context_data.get('articleBrief', {}).get('user_prompt')
+    user_prompt = context_data.get('userPrompt')
     print("retrieved variables")
     for _ in range(max_retries):
         try:
@@ -211,59 +211,46 @@ async def outline_gen_ai_analysis(context_data: dict):
     return {}
 
 async def article_gen_ai_analysis(context_data: dict):
-    max_retries = 5
     print("ANALYZING data for article gen")
-    selected_headings = context_data.get('selected_headings')
-    selected_articles = [article['title'] for article in context_data.get('selected_articles')]
-    selected_keywords = context_data.get('selected_keywords')
-    title = context_data.get('customTitle') or context_data.get('selectedTitle')
-    input_keyword = context_data.get('input_keyword')
-    article_outline = context_data.get('outline')
-    context = context_data.get('context')
-    article_brief = context_data.get('articleBrief', {}).get('content_brief')
-    user_prompt = context_data.get('articleBrief', {}).get('user_prompt')
-    article_content = []
-
+    context_data = context_data.get('data')
+    selected_headings = context_data.get('selected_headings', [])
+    selected_articles = [article['title'] for article in context_data.get('selected_articles', [])]
+    selected_keywords = context_data.get('selected_keywords', [])
+    title = context_data.get('customTitle') or context_data.get('selectedTitle', '')
+    input_keyword = context_data.get('input_keyword', '')
+    article_outline = context_data.get('outline', [])
+    context = context_data.get('context', '')
+    article_brief = context_data.get('articleBrief', {}).get('content_brief', '')
+    user_prompt = context_data.get('userPrompt', '')
+   #print all keys in context_data
+    print("context_data keys")
+    print(context_data.keys())
     for section in article_outline:
+        print("section", section)
         for header, sub_headers in section.items():
-            for _ in range(max_retries):
-                try:
-                    print("formatting prompt")
-                    # Prepare the prompt with heading data
-                    prompt = article_gen.format(
-                        INPUT_KEYWORD=input_keyword,
-                        SELECTED_ARTICLES=selected_articles,
-                        SELECTED_HEADINGS=selected_headings,
-                        SELECTED_KEYWORDS=selected_keywords,
-                        TITLE=title,
-                        HEADER=header,
-                        SUB_HEADERS=sub_headers,
-                        OUTLINE=article_outline,
-                        CONTEXT=context,
-                        ARTICLE_BRIEF=article_brief,
-                        USER_PROMPT=user_prompt
-                    )
-                    print("awaiting Ai ARTICLE")
-                    print(prompt)
-                    #print newline
-                    print("\n")
-                    response = await generate_response(prompt, LLM_MODEL, API_KEY, BASE_URL, 0)
-                    if response:
-                        print("RESPONSE")
-                        print(response)
-                        try:
-                            article_content.append(json_repair.loads(response))  # Directly parse the JSON response to remove escaped text
-                            break
-                        except json.JSONDecodeError as e:
-                            print(f"JSON decoding failed: {str(e)} - Response was: '{response}'")
-                            article_content.append({})
-                except Exception as e:
-                    print(
-                        f"Failed to generate analysis for suggestion ai article. Exception type: {type(e).__name__}, Message: {str(e)}"
-                    )
-                    
-    return article_content
-    
+            print("header", header)
+            try:
+                print("formatting prompt")
+                prompt = article_gen.format(
+                    INPUT_KEYWORD=input_keyword,
+                    SELECTED_ARTICLES=selected_articles,
+                    SELECTED_HEADINGS=selected_headings,
+                    SELECTED_KEYWORDS=selected_keywords,
+                    TITLE=title,
+                    HEADER=header,
+                    SUB_HEADERS=sub_headers,
+                    OUTLINE=article_outline,
+                    CONTEXT=context,
+                    ARTICLE_BRIEF=article_brief,
+                    USER_PROMPT=user_prompt
+                )
+                print("awaiting Ai ARTICLE")
+                print(prompt)
+                print("\n")
+                async for chunk in generate_response_stream(prompt, LLM_MODEL, API_KEY, BASE_URL, 0):
+                    yield chunk
+            except Exception as e:
+                print(f"Failed to generate analysis for suggestion ai article. Exception type: {type(e).__name__}, Message: {str(e)}")
 
 async def get_suggestion_keywords_google_optimized(query, countryCode):
     # Define categorization keywords for all categories
@@ -398,7 +385,7 @@ async def perplexity_ai_analysis(context_data: dict):
     input_keyword = context_data.get('input_keyword', '')
     context = context_data.get('context', '')
     article_brief = context_data.get('articleBrief', {}).get('content_brief')
-    user_prompt = context_data.get('articleBrief', {}).get('user_prompt')
+    user_prompt = context_data.get('userPrompt')
 
     print("Context Data:", context_data)  # Log the context data
 
@@ -428,3 +415,6 @@ async def perplexity_ai_analysis(context_data: dict):
             print(f"Failed to generate analysis for suggestion ai outline. Exception type: {type(e).__name__}, Message: {str(e)}")
         
     return {}
+
+if __name__ == "__main__":
+    asyncio.run(invoke_perplexity("What is the capital of France?"))

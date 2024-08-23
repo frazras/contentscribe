@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from 'react';
+import ProgressBar from '../lib/Progressbar';
 
-function UserPrompt({ nextStep, stepData }) {
+function UserPrompt({ nextStep, stepData, nextModule }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [userPrompt, setUserPrompt] = useState('');
 
   useEffect(() => {
-    console.log('Stepdata on load:', stepData);
+    console.log('UserPrompt Stepdata on load:', stepData);
   }, [stepData]);
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
-    await nextStep({ ...stepData, userPrompt });
+    await nextStep({ userPrompt });
   };
 
   return (
@@ -28,7 +29,7 @@ function UserPrompt({ nextStep, stepData }) {
 
       <div className="flex justify-end mt-4">
         <button
-          className={`px-4 py-2 ${isSubmitting ? 'bg-blue-300' : 'bg-blue-500 hover:bg-blue-700'} text-white rounded transition-colors`}
+          className={`px-4 py-2 ${isSubmitting ? 'bg-gray-500' : 'bg-blue-500 hover:bg-blue-700'} text-white rounded transition-colors`}
           onClick={handleSubmit}
           disabled={isSubmitting}
         >
@@ -40,11 +41,15 @@ function UserPrompt({ nextStep, stepData }) {
               </svg>
               Processing...
             </div>
-          ) : (
-            'Create Article Outline'
-          )}
+          ) : nextModule.buttonLabel}
         </button>
       </div>
+      {isSubmitting && nextModule.hasProgressBar && (
+        <ProgressBar 
+          executionTime={nextModule.executionTime} 
+          renderProgressMessage={nextModule.renderProgressMessage} 
+        />
+      )}
     </div>
   );
 }

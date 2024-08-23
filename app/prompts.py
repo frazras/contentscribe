@@ -176,7 +176,7 @@ Identify gaps in the content covered by top-ranking articles and include unique 
 
 The content should be descriptive, answering questions directly related to the title and demonstrating the next step if relevant. Think about what Google's "People Also Ask" section as inspiration for related content.
 
-The response should be a JSON in the form: "articleBrief": {{"content_brief": "Generated content brief as plaint text"}},{{"user_prompt": "Generated user prompt as plaint text"}}. 
+The response should be a JSON in the form: "articleBrief": {{"content_brief": "Generated content brief as plaint text"}}. 
 No explanations or notes should be included.
 
 Ensure the response is valid JSON and does not include markdown, do not use the markdown syntax ```json or else I will get syntax errors in the code.

@@ -1,9 +1,10 @@
 import logging
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, Response, stream_with_context
 import json
-from .keygen import get_keyword_data, combine_headings, title_gen_ai_analysis, outline_gen_ai_analysis, article_gen_ai_analysis, perplexity_ai_analysis
+from .keygen import get_keyword_data, combine_headings, title_gen_ai_analysis, outline_gen_ai_analysis, article_gen_ai_analysis, perplexity_ai_analysis, invoke_perplexity
 import requests
 from tavily import TavilyClient
+import asyncio
 
 import os
 from dotenv import load_dotenv
@@ -74,7 +75,8 @@ async def generate_title():
         results_data = response.json()
         organic_results = results_data.get('organic', [])
         extracted_data = []
-        ignored_domains = ['youtube.com', 'pinterest.com', 'quora.com', 'reddit.com', 'tiktok.com', 'instagram.com', 'facebook.com', 'amazon.com', 'tripadvisor.com']
+        # ignore non article domains without headings
+        ignored_domains = ['youtube.com', 'pinterest.com', 'quora.com', 'reddit.com', 'tiktok.com', 'instagram.com', 'facebook.com', 'play.google.com', 'apps.apple.com', 'amazon.com', 'tripadvisor.com', 'etsy.com']
         for result in organic_results:
             urllink = result.get('link')
             domain = urllink.split('/')[2]  # Extract the domain from the URL
@@ -150,28 +152,52 @@ async def new_title_gen():
 
 @main.route('/outlinegen', methods=['POST'])
 async def outline_gen():
-    if not request.is_json:
-        return jsonify({"error": "Bad Request", "message": "The browser (or proxy) sent a request that this server could not understand."}), 400
     print("GOT REQUEST-----")
     data = request.json
-    print("GOT DATA")
+    print("GOT DATA", data)
     outline = await outline_gen_ai_analysis(data)
-    print("GOT OUTLINE")
-    print(outline)  
+    print("GOT OUTLINE", outline)
     return jsonify({"success": True, "results": outline})
 
 @main.route('/articlegen', methods=['POST'])
-async def article_gen():
+def article_gen():
     print("Preparing article generation")
     if not request.is_json:
         return jsonify({"error": "Bad Request", "message": "The browser (or proxy) sent a request that this server could not understand."}), 400
-    print("GOT REQUES.T.")
-    data = request.json
     print("GOT DATA")
-    article = await article_gen_ai_analysis(data)
-    print("GOT ARTICLE")
-    print(article)
-    return jsonify({"success": True, "results": article, "title": data.get('customTitle') or data.get('selectedTitle')})
+    data = request.json
+
+    async def generate():
+        print("Starting generate")
+        async for chunk in article_gen_ai_analysis(data):
+            print(f"Received chunk: {chunk}")
+            words = chunk.split()
+            for i in range(0, len(words), 5):
+                mini_chunk = ' '.join(words[i:i+5])
+                print(f"Yielding mini_chunk: {mini_chunk}")
+                yield mini_chunk + ' '
+                yield '\n'
+
+    def stream():
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        try:
+            async_gen = generate()
+            while True:
+                try:
+                    chunk = loop.run_until_complete(async_gen.__anext__())
+                    print(f"Yielding to Flask!: {chunk}")
+                    yield chunk
+                    yield ''  # This empty string forces a flush
+                except StopAsyncIteration:
+                    print("StopAsyncIteration")
+                    break
+        finally:
+            print("Closing loop")
+            loop.close()
+
+    print("Returning Response")
+    return Response(stream_with_context(stream()), mimetype='text/plain')
 
 @main.route('/articlebrief', methods=['POST'])
 async def article_brief():
@@ -185,3 +211,20 @@ async def article_brief():
     print("GOT BRIEF")
     print(brief)
     return jsonify({"success": True, "results": brief})
+
+@main.route('/test-perplexity', methods=['POST'])
+async def test_perplexity():
+    if not request.is_json:
+        return jsonify({"error": "Bad Request", "message": "The request must be JSON"}), 400
+    
+    data = request.json
+    prompt = data.get('prompt')
+    
+    if not prompt:
+        return jsonify({"error": "Bad Request", "message": "Prompt is required"}), 400
+    
+    try:
+        response = await invoke_perplexity(prompt)
+        return jsonify({"success": True, "response": response})
+    except Exception as e:
+        return jsonify({"error": "Server Error", "message": str(e)}), 500

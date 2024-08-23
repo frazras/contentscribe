@@ -3,6 +3,7 @@
         "articlebrief",
         "headerscrape",
         "newtitlegen",
+        "openai",
         "outlinegen"
     ]
 }

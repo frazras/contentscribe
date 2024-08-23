@@ -6,7 +6,7 @@ function Headings({ nextStep, stepData, nextModule }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    console.log('Headings Stepdata on load:', stepData)
+    console.log('Headings Stepdata on load:', stepData);
   }, [stepData]);
 
   const handleHeadingChange = (heading) => {
@@ -29,7 +29,7 @@ function Headings({ nextStep, stepData, nextModule }) {
       Choose the headings you want to consider in creating your article.</p>
       
       <div className="overflow-y-scroll h-64 border border-gray-300 rounded px-4 py-2 mb-4">
-        {stepData?.headings ? stepData.headings.map((heading, index) => (
+        {stepData?.headings && stepData.headings.length > 0 ? stepData.headings.map((heading, index) => (
           <label key={index} className="block">
             <input
               type="checkbox"
@@ -39,7 +39,7 @@ function Headings({ nextStep, stepData, nextModule }) {
             />
             {heading}
           </label>
-        )) : "No headings found"}
+        )) : "No headings found. The selected sources may not be articles."}
       </div>
 
       <div className="flex justify-end mt-4">

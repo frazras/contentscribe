@@ -1,43 +1,60 @@
 // src/App.js
 import React, { useState, useRef, useEffect } from 'react';
-import './App.css'; // This now imports Tailwind CSS
-import axios from 'axios'; // Import axios for API calls
+import './App.css';
+import axios from 'axios';
 import { JsonView, darkStyles } from 'react-json-view-lite';
 import 'react-json-view-lite/dist/index.css';
-import moduleData from './moduleData'; // Import the module data
+import moduleData, { debug } from './moduleData';
+import debugdata from './debug';
+import { DEBUG_MODE } from './config'; // Import the debug mode setting
 
 function App() {
   const [currentStep, setCurrentStep] = useState(0);
   const [modules, setModules] = useState([]);
   const [stepData, setStepData] = useState({});
-  const [loading, setLoading] = useState(true); // New state for loading
+  const [loading, setLoading] = useState(true);
   const serverUrl = window.location.origin;
 
-  // Set up axios defaults for CORS
   axios.defaults.baseURL = serverUrl;
   axios.defaults.headers.post['Content-Type'] = 'application/json';
 
-  // Using useRef to persist globalData across renders without causing re-renders
   const globalData = useRef({});
 
   useEffect(() => {
     const fetchModules = async () => {
-      // Dynamically import the components
       const importedModules = await Promise.all(
         moduleData.map(async (module) => {
-          const component = await import(`./modules/${module.component}`);
-          return { ...module, component: component.default };
+          const importedModule = await import(`./modules/${module.component}`);
+          return { ...module, code: importedModule.default };
         })
       );
 
       setModules(importedModules);
-      setLoading(false); // Set loading to false after modules are fetched
+      setLoading(false);
     };
 
     fetchModules();
   }, []);
 
+  useEffect(() => {
+    // Initialize globalData with debugdata if in debug mode
+    if (DEBUG_MODE) {
+      globalData.current = { ...debugdata };
+      setStepData(debugdata);
+    }
+  }, []);
+
   const callApiForStep = async (step, params) => {
+    if (DEBUG_MODE) {
+      // In debug mode, check if the step is in the list of debug modules
+      const isDebugModule = debug.some(module => module.order === step);
+      if (!isDebugModule) {
+        // If not in the list of debug modules, just update the current step
+        setCurrentStep(step);
+        return;
+      }
+    }
+
     let endpoint = '';
     let callApi = true;
 
@@ -100,6 +117,7 @@ function App() {
         break;
       case 7:
         endpoint = '/api/articlegen';
+        callApi = false;
         break;
       default:
         console.error('Invalid step for callApiForStep', step);
@@ -134,9 +152,22 @@ function App() {
 
   const nextStep = (params, executionTime) => {
     const nextStepNumber = currentStep + 1;
-    callApiForStep(nextStepNumber, params);
-    console.log("nextStepNumber", nextStepNumber);
     
+    const nextModule = modules.find(mod => mod.order === nextStepNumber);
+    console.log(debug);
+    const shouldCallApi = debug.some(item => item.component === nextModule?.component);
+    debugger;
+    if (DEBUG_MODE && !shouldCallApi) {
+      setCurrentStep(nextStepNumber);
+    } else {
+      if (DEBUG_MODE && shouldCallApi) {
+        // Temporarily exit debug mode for this step
+        callApiForStep(nextStepNumber, params);
+      } else {
+        callApiForStep(nextStepNumber, params);
+      }
+    }
+
     // Update the next module's execution time
     const updatedModules = [...modules];
     const nextModuleIndex = updatedModules.findIndex(mod => mod.order === nextStepNumber);
@@ -151,8 +182,7 @@ function App() {
 
   const prevStep = () => {
     if (currentStep > 0) {
-      const prevStepNumber = currentStep - 1;
-      setCurrentStep(prevStepNumber);
+      setCurrentStep(currentStep - 1);
     }
   };
 
@@ -171,11 +201,12 @@ function App() {
               </div>
             ) : (
               modules.map((module, index) => (
-                currentStep === index && React.createElement(module.component, {
-                  key: module.order, // Add unique key prop
+                currentStep === index && React.createElement(module.code, {
+                  key: module.order,
                   prevStep: prevStep,
                   nextStep: nextStep,
-                  stepData: stepData,
+                  stepData: DEBUG_MODE ? debugdata : stepData,
+                  globalData: globalData, // Pass globalData as a prop
                   nextModule: modules.find(mod => mod.order === index + 1)
                 })
               ))
@@ -184,10 +215,16 @@ function App() {
         </div>
       </div>
 
-      {Object.keys(globalData.current).length > 0 && (
+      {(Object.keys(globalData.current).length > 0 || DEBUG_MODE) && (
         <div style={{ textAlign: 'left' }}>
           Context Data:
-          <JsonView data={globalData.current} shouldExpandNode={() => false} clickToExpandNode={true} allExpanded={false} style={darkStyles} />
+          <JsonView 
+            data={DEBUG_MODE ? debugdata : globalData.current} 
+            shouldExpandNode={() => false} 
+            clickToExpandNode={true} 
+            allExpanded={false} 
+            style={darkStyles} 
+          />
         </div>
       )}
     </div>

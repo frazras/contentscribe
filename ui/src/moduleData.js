@@ -59,6 +59,16 @@ const moduleData = [
   },
   {
     order: 5,
+    name: "Custom User Prompt",
+    component: 'UserPrompt',
+    prerequisites: ["Titles"],
+    executionTime: 120,
+    hasProgressBar: true,
+    buttonLabel: "Provide a Prompt",
+    renderProgressMessage: null
+  },
+  {
+    order: 6,
     name: "Article Outline",
     component: 'ArticleOutline',
     prerequisites: ["Titles"],
@@ -68,7 +78,7 @@ const moduleData = [
     renderProgressMessage: null
   },
   {
-    order: 6,
+    order: 7,
     name: "Article Generation",
     component: 'ArticleGeneration',
     prerequisites: ["ArticleOutline"],
@@ -79,4 +89,5 @@ const moduleData = [
   }
 ];
 
+export const debug = moduleData.filter(module => module.order === 7 || module.order === 7);
 export default moduleData;

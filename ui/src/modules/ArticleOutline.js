@@ -39,7 +39,7 @@ const Section = ({ section, index, moveSection }) => {
 
   return (
     <div ref={ref} style={{ opacity: isDragging ? 0.5 : 1 }}>
-      <Disclosure>
+      <Disclosure defaultOpen>
         {({ open }) => (
           <>
             <Disclosure.Button className="flex justify-between w-full px-4 py-2 text-sm font-medium text-left text-blue-900 bg-blue-100 rounded-lg hover:bg-blue-200 focus:outline-none focus-visible:ring focus-visible:ring-blue-500 focus-visible:ring-opacity-75">
@@ -70,16 +70,20 @@ const Section = ({ section, index, moveSection }) => {
 
 const ArticleOutline = ({ nextStep, stepData, nextModule }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [outline, setOutline] = useState(stepData?.outline || []);
+  const [outline, setOutline] = useState([]);
 
   useEffect(() => {
-    console.log('Titles Stepdata on load:', stepData);
+    console.log('Stepdata on load:', stepData);
+    if (stepData?.outline) {
+      setOutline(stepData.outline);
+    } else {
+      console.warn('No outline data found in stepData');
+    }
   }, [stepData]);
-
   const handleSubmit = useCallback(async () => {
     setIsSubmitting(true);
-    await nextStep({ ...stepData, outline });
-  }, [nextStep, stepData, outline]);
+    await nextStep({ outline: outline });
+  }, [nextStep, outline]);
 
   const moveSection = useCallback((dragIndex, hoverIndex) => {
     setOutline(prevOutline => {
