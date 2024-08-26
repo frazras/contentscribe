@@ -1,4 +1,6 @@
 from openai import AsyncOpenAI
+import google.generativeai as genai
+import os
 import asyncio
 
 MAX_RETRIES = 2
@@ -32,6 +34,15 @@ async def generate_response(user_prompt, model, api_key, base_url="https://api.o
             if "openai.com" in base_url:
                 api_params["response_format"] = {"type": "json_object"}
 
+            if "googleapis.com" in base_url:
+                genai.configure(api_key=api_key)
+                model = genai.GenerativeModel(model)
+                response = model.generate_content(
+                    user_prompt,
+                    generation_config={"response_mime_type": "application/json"}
+                )
+                return response.text
+            
             completion = await async_openai_client.chat.completions.create(**api_params)
             response = completion.choices[0].message.content
             return response
@@ -73,9 +84,19 @@ async def generate_response_stream(user_prompt, model, api_key, base_url="https:
             if "openai.com" in base_url and json_response:
                 api_params_stream["response_format"] = {"type": "json_object"}
             
-            async for chunk in await async_openai_client.chat.completions.create(**api_params_stream):
-                if chunk.choices and chunk.choices[0].delta and chunk.choices[0].delta.content:
-                    yield chunk.choices[0].delta.content
+            if "googleapis.com" in base_url:
+                genai.configure(api_key=api_key)
+                model = genai.GenerativeModel(model)
+                async for chunk in await model.generate_content_async(
+                    user_prompt,
+                    # generation_config={"response_mime_type": "application/json"},
+                    stream=True
+                ):
+                    yield chunk.text
+            else:
+                async for chunk in await async_openai_client.chat.completions.create(**api_params_stream):
+                    if chunk.choices and chunk.choices[0].delta and chunk.choices[0].delta.content:
+                        yield chunk.choices[0].delta.content
             break
 
         except Exception as e:

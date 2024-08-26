@@ -255,21 +255,6 @@ async def article_gen_ai_analysis(context_data: dict):
             except Exception as e:
                 print(f"Failed to generate analysis for suggestion ai article. Exception type: {type(e).__name__}, Message: {str(e)}")
                 yield f"Error: {str(e)}"
-
-async def generate_response_stream(prompt, model, api_key, base_url, temperature):
-    # Implement this function to generate the response stream
-    # This should be an async generator that yields strings
-    # For example:
-    client = AsyncOpenAI(api_key=api_key, base_url=base_url)
-    response = await client.chat.completions.create(
-        model=model,
-        messages=[{"role": "user", "content": prompt}],
-        temperature=temperature,
-        stream=True
-    )
-    async for chunk in response:
-        if chunk.choices[0].delta.content is not None:
-            yield chunk.choices[0].delta.content
              
 async def get_suggestion_keywords_google_optimized(query, countryCode):
     # Define categorization keywords for all categories

@@ -93,8 +93,7 @@ function App() {
         if (params.selected_articles) {
           globalData.current.selected_articles = params.selected_articles;
         }
-        console.log("params headerscrape", params);
-        console.log("globalData.current", globalData.current);
+        
         // Ensure input_keyword is not empty or undefined
         if (!globalData.current.selected_articles || globalData.current.selected_articles.length === 0) {
           console.error('No Article Selected');
@@ -150,13 +149,19 @@ function App() {
     setCurrentStep(step);
   };
 
-  const nextStep = (params, executionTime) => {
+  const nextStep = (params, executionTime, reset) => {
+    console.log("Reset", reset);
+    if (reset) {
+      globalData.current = {};
+      setStepData({});
+      setCurrentStep(0);
+    } 
     const nextStepNumber = currentStep + 1;
     
     const nextModule = modules.find(mod => mod.order === nextStepNumber);
     console.log(debug);
     const shouldCallApi = debug.some(item => item.component === nextModule?.component);
-    debugger;
+
     if (DEBUG_MODE && !shouldCallApi) {
       setCurrentStep(nextStepNumber);
     } else {

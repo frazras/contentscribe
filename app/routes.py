@@ -130,12 +130,9 @@ async def outline_gen(request: Request):
 
 @router.post('/articlegen')
 async def article_gen(request: Request):
-    print("Received articlegen request")
     try:
         data = await request.json()
-        print("Request data:", data)
     except Exception as e:
-        print("Error parsing request JSON:", str(e))
         raise HTTPException(status_code=400, detail="Invalid JSON in request body")
 
     if not data:
@@ -143,16 +140,12 @@ async def article_gen(request: Request):
 
     async def generate():
         try:
-            print("Starting article generation")
             async for chunk in article_gen_ai_analysis(data):
-                print("Yielding chunk:", chunk)
                 yield chunk.encode('utf-8')
-            print("Article generation complete")
         except Exception as e:
             print(f"Error in article generation: {str(e)}")
             yield f"Error: {str(e)}".encode('utf-8')
 
-    print("Returning StreamingResponse")
     return StreamingResponse(generate(), media_type='text/plain')
 
 @router.post('/articlebrief')

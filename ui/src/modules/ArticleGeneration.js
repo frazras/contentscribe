@@ -51,7 +51,6 @@ function ArticleGeneration({ nextStep, globalData }) {
         }
       } catch (err) {
         console.error('Error in handleGenerateArticle:', err);
-        setError(`An error occurred: ${err.message}`);
       } finally {
         setIsGenerating(false);
       }
@@ -73,7 +72,7 @@ function ArticleGeneration({ nextStep, globalData }) {
   };
 
   useEffect(() => {
-    handleGenerateArticle(); // Run handleGenerateArticle on page load
+    //handleGenerateArticle(); // Run handleGenerateArticle on page load
     return () => {
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
@@ -118,17 +117,16 @@ function ArticleGeneration({ nextStep, globalData }) {
         Copy to Clipboard
       </button>
       <button 
-        className="bg-green-500 text-white px-4 py-2 rounded"
-        onClick={() => nextStep({})}
-        disabled={isGenerating || !articleContent}
-      >
-        Next
+        className="bg-green-600 text-white px-4 py-2 rounded"
+        onClick={() => {nextStep({ reset: true }); console.log("resetted");}} // Assuming nextStep can handle a reset action
+        >
+        Go Back to Beginning!
       </button>
       <button 
         className="bg-yellow-500 text-white px-4 py-2 rounded mt-4"
         onClick={handleGenerateArticle}
       >
-        {isGenerating ? 'Stop Generation' : 'Start Generation'}
+        {isGenerating ? 'Stop Generation' : 'Regenerate Article'}
       </button>
     </div>
   );
