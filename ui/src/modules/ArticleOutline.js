@@ -56,9 +56,13 @@ const Section = ({ section, index, moveSection }) => {
             </Disclosure.Button>
             <Disclosure.Panel className="px-4 pt-4 pb-2 text-sm text-gray-500">
               <ul>
-                {section[sectionTitle].map((item, idx) => (
-                  <li key={idx} className="list-disc list-inside">{item}</li>
-                ))}
+                {Array.isArray(section[sectionTitle]) ? (
+                  section[sectionTitle].map((item, idx) => (
+                    <li key={idx} className="list-disc list-inside">{typeof item === 'object' ? JSON.stringify(item) : item}</li>
+                  ))
+                ) : (
+                  <li className="list-disc list-inside">{JSON.stringify(section[sectionTitle])}</li>
+                )}
               </ul>
             </Disclosure.Panel>
           </>

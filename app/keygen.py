@@ -21,12 +21,12 @@ BASE_URL = os.getenv('BASE_URL', 'https://api.openai.com/v1')
 BASE_URL_B = os.getenv('BASE_URL_B', BASE_URL)
 
 PERPLEXITY_MODEL = os.getenv('PERPLEXITY_MODEL', 'llama-3-sonar-large-32k-chat')
-PERPLEXITY_API_KEY = os.getenv('PERPLEXITY_API_KEY', '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')
+PERPLEXITY_API_KEY = os.getenv('PERPLEXITY_API_KEY')
 PERPLEXITY_BASE_URL = os.getenv('PERPLEXITY_BASE_URL', 'https://api.perplexity.ai')
 
 async def get_keyword_data(input_keyword, input_country):
     # Get results
-    print("GETTTING KEY WORDS")
+    print("GETTING KEY WORDS")
 
     keyword_data = await get_suggestion_keywords_google_optimized(
         input_keyword, input_country

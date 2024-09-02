@@ -16,17 +16,13 @@ load_dotenv()
 LLM_MODEL = os.getenv('LLM_MODEL', 'gpt-4o')  # Smart AI
 LLM_MODEL_B = os.getenv('LLM_MODEL_B', 'gpt-3.5-turbo')  # Fast AI
 API_KEY = os.getenv('API_KEY')
-API_KEY_B = os.getenv('API_KEY_B',API_KEY)
+API_KEY_B = os.getenv('API_KEY_B', API_KEY)
 BASE_URL = os.getenv('BASE_URL', 'https://api.openai.com/v1')
 BASE_URL_B = os.getenv('BASE_URL_B', BASE_URL)
 
 router = APIRouter()
 
 url = "https://google.serper.dev/search"
-
-@router.get('/')
-async def index():
-    return {"message": "Welcome to the API"}
 
 @router.get('/api')
 async def api_root():
@@ -36,6 +32,8 @@ async def api_root():
 async def generate_keywords(request: Request):
     data = await request.json()
     input_keyword = data.get('input_keyword')
+    selected_llm = data.get('selectedLLM')  # Scan for selectedLLM
+    print(f"Selected LLM: {selected_llm}")  # Print the selected LLM
     if not input_keyword:
         raise HTTPException(status_code=400, detail="Keyword is required.")
     
@@ -46,11 +44,13 @@ async def generate_keywords(request: Request):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     
-    return keyword_data
+    return JSONResponse(content=keyword_data)
 
 @router.post('/serpscrape')
 async def generate_title(request: Request):
     data = await request.json()
+    selected_llm = data.get('selectedLLM')  # Scan for selectedLLM
+    print(f"Selected LLM: {selected_llm}")  # Print the selected LLM
     input_keyword = data.get('input_keyword')
     if not input_keyword:
         raise HTTPException(status_code=400, detail="Keyword is required.")
@@ -106,6 +106,8 @@ async def generate_title(request: Request):
 @router.post('/headerscrape')
 async def serp_scan(request: Request):
     data = await request.json()
+    selected_llm = data.get('selectedLLM')  # Scan for selectedLLM
+    print(f"Selected LLM: {selected_llm}")  # Print the selected LLM
     links = data.get('selected_articles')
     if not links:
         raise HTTPException(status_code=400, detail="Links are required.")
@@ -119,12 +121,16 @@ async def serp_scan(request: Request):
 @router.post('/newtitlegen')
 async def new_title_gen(request: Request):
     data = await request.json()
+    selected_llm = data.get('selectedLLM')  # Scan for selectedLLM
+    print(f"Selected LLM: {selected_llm}")  # Print the selected LLM
     titles = await title_gen_ai_analysis(data)
     return {"success": True, "results": titles}
 
 @router.post('/outlinegen')
 async def outline_gen(request: Request):
     data = await request.json()
+    selected_llm = data.get('selectedLLM')  # Scan for selectedLLM
+    print(f"Selected LLM: {selected_llm}")  # Print the selected LLM
     outline = await outline_gen_ai_analysis(data)
     return {"success": True, "results": outline}
 
@@ -137,6 +143,9 @@ async def article_gen(request: Request):
 
     if not data:
         raise HTTPException(status_code=400, detail="Request body is empty")
+
+    selected_llm = data.get('selectedLLM')  # Scan for selectedLLM
+    print(f"Selected LLM: {selected_llm}")  # Print the selected LLM
 
     async def generate():
         try:
@@ -151,5 +160,7 @@ async def article_gen(request: Request):
 @router.post('/articlebrief')
 async def article_brief(request: Request):
     data = await request.json()
+    selected_llm = data.get('selectedLLM')  # Scan for selectedLLM
+    print(f"Selected LLM: {selected_llm}")  # Print the selected LLM
     brief = await perplexity_ai_analysis(data)
     return {"success": True, "results": brief}

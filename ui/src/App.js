@@ -1,4 +1,3 @@
-// src/App.js
 import React, { useState, useRef, useEffect } from 'react';
 import './App.css';
 import axios from 'axios';
@@ -14,11 +13,14 @@ function App() {
   const [stepData, setStepData] = useState({});
   const [loading, setLoading] = useState(true);
   const serverUrl = window.location.origin;
+  const apiBasePath = '/api';
 
   axios.defaults.baseURL = serverUrl;
   axios.defaults.headers.post['Content-Type'] = 'application/json';
 
   const globalData = useRef({});
+  const [selectedLLM, setSelectedLLM] = useState('Google Gemini');
+  const llmOptions = ['Google Gemini', 'OpenAI', 'Anthropic'];
 
   useEffect(() => {
     const fetchModules = async () => {
@@ -44,6 +46,17 @@ function App() {
     }
   }, []);
 
+  useEffect(() => {
+    globalData.current.selectedLLM = selectedLLM;
+    console.log("Selected LLM Global Data:DN " + globalData.current.selectedLLM);
+    console.log(globalData.current);
+  }, [selectedLLM]);
+
+  const handleLLMChange = (event) => {
+    setSelectedLLM(event.target.value);
+    console.log("Selected LLM: " + event.target.value);
+  };
+
   const callApiForStep = async (step, params) => {
     if (DEBUG_MODE) {
       // In debug mode, check if the step is in the list of debug modules
@@ -60,13 +73,11 @@ function App() {
 
     switch (step) {
       case 1:
-        endpoint = '/api/keygen';
+        endpoint = '/keygen';
         if (params.input_keyword) {
-          globalData.current = {
-            input_keyword: params.input_keyword,
-            country: params.country,
-            additional_keywords: params.additional_keywords
-          };
+          globalData.current.input_keyword = params.input_keyword;
+          globalData.current.country = params.country;
+          globalData.current.additional_keywords = params.additional_keywords;
         }
         if ((!params.input_keyword || params.input_keyword.trim() === '') &&
           (!globalData.current.input_keyword || globalData.current.input_keyword.trim() === '')) {
@@ -75,7 +86,7 @@ function App() {
         }
         break;
       case 2:
-        endpoint = '/api/serpscrape';
+        endpoint = '/serpscrape';
         // Ensure input_keyword is not empty or undefined
         if (params.input_keyword) {
           globalData.current.input_keyword = params.input_keyword;
@@ -88,7 +99,7 @@ function App() {
         }
         break;
       case 3:
-        endpoint = '/api/headerscrape';
+        endpoint = '/headerscrape';
 
         if (params.selected_articles) {
           globalData.current.selected_articles = params.selected_articles;
@@ -101,7 +112,7 @@ function App() {
         }
         break;
       case 4:
-        endpoint = '/api/newtitlegen';
+        endpoint = '/newtitlegen';
         // Ensure selectedArticles is not empty or undefined
         if (!globalData.current.input_keyword || globalData.current.input_keyword.trim() === '') {
           console.error('Keyword is required for Title Generation');
@@ -109,13 +120,13 @@ function App() {
         }
         break;
       case 5:
-        endpoint = '/api/articlebrief';
+        endpoint = '/articlebrief';
         break;
       case 6:
-        endpoint = '/api/outlinegen';
+        endpoint = '/outlinegen';
         break;
       case 7:
-        endpoint = '/api/articlegen';
+        endpoint = '/articlegen';
         callApi = false;
         break;
       default:
@@ -123,6 +134,13 @@ function App() {
         return;
     }
 
+    // Check if the request is originating from port 3000
+    const port = window.location.port;
+    if (port === '3000') {
+      endpoint = `http://localhost:8000${apiBasePath}${endpoint}`;
+    } else {
+      endpoint = `${apiBasePath}${endpoint}`;
+    }
 
     console.log("Api: " + endpoint + " called with params", globalData.current);
     try {
@@ -195,6 +213,21 @@ function App() {
     <div className="App">
       <div className="min-h-screen bg-gray-100 flex flex-col">
         <h1 className="text-3xl font-bold mt-3 self-center">ContentScribe</h1>
+        <div className="flex justify-end items-center mt-2">
+          <div className="text-right">
+            <label htmlFor="llm-select" className="mr-12 block mb-1">Select LLM:</label>
+            <select
+              id="llm-select"
+              value={selectedLLM}
+              onChange={handleLLMChange}
+              className="p-2 border border-gray-300 rounded-md mr-12"
+            >
+              {llmOptions.map((llm) => (
+                <option key={llm} value={llm}>{llm}</option>
+              ))}
+            </select>
+          </div>
+        </div>
         <div className="flex-grow flex items-center justify-center">
           <div className="max-w-xl mx-auto p-8 bg-white border border-gray-300 rounded-lg shadow-lg text-left">
             {loading ? (
