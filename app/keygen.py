@@ -12,17 +12,45 @@ import json_repair
 # Load environment variables from .env file
 load_dotenv()
 
-# Access variables securely
-LLM_MODEL = os.getenv('LLM_MODEL', 'gpt-4o')  # Smart AI
-LLM_MODEL_B = os.getenv('LLM_MODEL_B', 'gpt-3.5-turbo')  # Fast AI
-API_KEY = os.getenv('API_KEY')
-API_KEY_B = os.getenv('API_KEY_B',API_KEY)
-BASE_URL = os.getenv('BASE_URL', 'https://api.openai.com/v1')
-BASE_URL_B = os.getenv('BASE_URL_B', BASE_URL)
-
-PERPLEXITY_MODEL = os.getenv('PERPLEXITY_MODEL', 'llama-3-sonar-large-32k-chat')
-PERPLEXITY_API_KEY = os.getenv('PERPLEXITY_API_KEY')
-PERPLEXITY_BASE_URL = os.getenv('PERPLEXITY_BASE_URL', 'https://api.perplexity.ai')
+def set_llm_variables(selected_llm):
+    """
+    Set the LLM_MODEL variables based on the selected_llm value.
+    
+    Args:
+    selected_llm (str): The LLM selected in the UI.
+    
+    Returns:
+    dict: A dictionary containing the LLM_MODEL, LLM_MODEL_B, API_KEY, and BASE_URL.
+    """
+    if selected_llm == "gemini":
+        return {
+            "LLM_MODEL": os.getenv('GOOGLE_GEMINI_MODEL'),
+            "LLM_MODEL_B": os.getenv('GOOGLE_GEMINI_MODEL_B'),
+            "API_KEY": os.getenv('GOOGLE_GEMINI_API_KEY'),
+            "BASE_URL": os.getenv('GOOGLE_GEMINI_BASE_URL')
+        }
+    elif selected_llm == "openai":
+        return {
+            "LLM_MODEL": os.getenv('OPENAI_LLM_MODEL'),
+            "LLM_MODEL_B": os.getenv('OPENAI_LLM_MODEL_B'),
+            "API_KEY": os.getenv('OPENAI_API_KEY'),
+            "BASE_URL": os.getenv('OPENAI_BASE_URL')
+        }
+    elif selected_llm == "anthropic":
+        return {
+            "LLM_MODEL": os.getenv('ANTHROPIC_MODEL'),
+            "LLM_MODEL_B": os.getenv('ANTHROPIC_MODEL_B'),
+            "API_KEY": os.getenv('ANTHROPIC_API_KEY'),
+            "BASE_URL": os.getenv('ANTHROPIC_BASE_URL')
+        }
+    else:
+        # Default to OpenAI if no match is found
+        return {
+            "LLM_MODEL": os.getenv('OPENAI_LLM_MODEL'),
+            "LLM_MODEL_B": os.getenv('OPENAI_LLM_MODEL_B'),
+            "API_KEY": os.getenv('OPENAI_API_KEY'),
+            "BASE_URL": os.getenv('OPENAI_BASE_URL')
+        }
 
 async def get_keyword_data(input_keyword, input_country):
     # Get results
@@ -44,40 +72,18 @@ async def get_keyword_data(input_keyword, input_country):
 
     print("Got " + str(len(keyword_data)) + " cleaned keywords")
     print(json.dumps(keyword_data, indent=4))
-    
-    max_attempts = 2
-    for attempt in range(max_attempts):
-        try:
-            ai_report = await suggestions_ai_analysis(keyword_data)
-            print(ai_report)
-            # convert to json
-            try:
-                ai_report = json_repair.loads(ai_report)
-            except json.JSONDecodeError as e:
-                print(f"JSON decoding failed: {str(e)} - Response was: '{ai_report}'")
-                ai_report = {}
-            break
-        except Exception as e:
-            print(f"Exception occurred: {str(e)}. Attempt {attempt + 1} of {max_attempts}")
-            if attempt == max_attempts - 1:
-                ai_report = {}
-
-    # Preparing the result
-    result = {
-        "success": True,
-        "results": ai_report,
-    }
-
-    return result
+    return keyword_data
 
 def remove_similar_keywords(keyword_data):
     keyword_data = [keyword for keyword in keyword_data if len(set(keyword.split())) > 1]
     keyword_data.sort()
     return keyword_data
 
-async def suggestions_ai_analysis(keyword_data: str):
+async def suggestions_ai_analysis(keyword_data: str, selected_llm: str):
     max_retries = 5
     print("ANALYZING KEY WORDS")
+    
+    llm_vars = set_llm_variables(selected_llm)
     
     for _ in range(max_retries):
         try:
@@ -87,7 +93,7 @@ async def suggestions_ai_analysis(keyword_data: str):
             )
             print("awaiting Ai KEY WORDS")
 
-            return await generate_response(prompt, LLM_MODEL_B, API_KEY_B,BASE_URL_B, 0)
+            return await generate_response(prompt, llm_vars["LLM_MODEL_B"], llm_vars["API_KEY"], llm_vars["BASE_URL"], 0)
 
         except Exception as e:
             print(
@@ -96,9 +102,11 @@ async def suggestions_ai_analysis(keyword_data: str):
 
     return ""
 
-async def suggestions_ai_analysis_headings(heading_data: str):
+async def suggestions_ai_analysis_headings(heading_data: str, selected_llm: str):
     max_retries = 5
     print("ANALYZING HEADINGS")
+
+    llm_vars = set_llm_variables(selected_llm)
 
     for _ in range(max_retries):
         try:
@@ -108,30 +116,25 @@ async def suggestions_ai_analysis_headings(heading_data: str):
             )
             print("awaiting Ai HEADINGS")
 
-            # Generate response and directly parse JSON to avoid escaped text
-            response = await generate_response(prompt, LLM_MODEL_B, API_KEY_B, BASE_URL_B, 0)
-            if response:
-                try:
-                    return json_repair.loads(response)  # Directly parse the JSON response to remove escaped text
-                except json.JSONDecodeError as e:
-                    print(f"JSON decoding failed: {str(e)} - Response was: '{response}'")
-                    return {}
+            # Generate response without parsing JSON
+            response = await generate_response(prompt, llm_vars["LLM_MODEL_B"], llm_vars["API_KEY"], llm_vars["BASE_URL"], 0)
+            return response
         except Exception as e:
             print(
                 f"Failed to generate analysis for suggestion headings. Exception type: {type(e).__name__}, Message: {str(e)}"
             )
 
-    return {}
+    return ""
 
-async def title_gen_ai_analysis(context_data: dict):
+async def title_gen_ai_analysis(context_data: dict, selected_llm: str):
     max_retries = 5
-    #convert json to dict
     print("ANALYZING data for title gen")
     input_keyword = context_data.get('input_keyword')
-    #selected_articles is a list of objects with keys: url and  title, extract to a list of titles
     selected_articles = [article['title'] for article in context_data.get('selected_articles')]
     selected_headings = context_data.get('selected_headings')
     selected_keywords = context_data.get('selected_keywords')
+
+    llm_vars = set_llm_variables(selected_llm)
 
     for _ in range(max_retries):
         try:
@@ -143,29 +146,23 @@ async def title_gen_ai_analysis(context_data: dict):
                 SELECTED_KEYWORDS=selected_keywords
             )
             print("awaiting Ai TITLES")
-
-            # Generate response and directly parse JSON to avoid escaped text
             print("PROMPT")
             print(prompt)
-            #pint newline
             print("\n")
-            response = await generate_response(prompt, LLM_MODEL_B, API_KEY_B, BASE_URL_B, 0)
-            if response:
-                print("RESPONSE")
-                print(response)
-                try:
-                    return json_repair.loads(response)  # Directly parse the JSON response to remove escaped text
-                except json.JSONDecodeError as e:
-                    print(f"JSON decoding failed: {str(e)} - Response was: '{response}'")
-                    return {}
+            
+            # Generate response without parsing JSON
+            response = await generate_response(prompt, llm_vars["LLM_MODEL_B"], llm_vars["API_KEY"], llm_vars["BASE_URL"], 0)
+            print("RESPONSE")
+            print(response)
+            return response
         except Exception as e:
             print(
                 f"Failed to generate analysis for suggestion ai titles. Exception type: {type(e).__name__}, Message: {str(e)}"
             )
 
-    return {}
+    return ""
 
-async def outline_gen_ai_analysis(context_data: dict):
+async def outline_gen_ai_analysis(context_data: dict, selected_llm: str):
     max_retries = 5
     print("ANALYZING data for outline gen")
     selected_articles = [article['title'] for article in context_data.get('selected_articles')]
@@ -177,6 +174,9 @@ async def outline_gen_ai_analysis(context_data: dict):
     article_brief = context_data.get('articleBrief', {}).get('content_brief')
     user_prompt = context_data.get('userPrompt')
     print("retrieved variables")
+
+    llm_vars = set_llm_variables(selected_llm)
+
     for _ in range(max_retries):
         try:
             print("formatting prompt")
@@ -193,24 +193,20 @@ async def outline_gen_ai_analysis(context_data: dict):
             )
             print("awaiting Ai OUTLINE")
             print(prompt)
-            #pint newline
             print("\n")
-            response = await generate_response(prompt, LLM_MODEL, API_KEY, BASE_URL, 0)
-            if response:
-                print("RESPONSE")
-                print(response)
-                try:
-                    return json_repair.loads(response)  # Directly parse the JSON response to remove escaped text
-                except json.JSONDecodeError as e:
-                    print(f"JSON decoding failed: {str(e)} - Response was: '{response}'")
-                    return {}
+            
+            # Generate response without parsing JSON
+            response = await generate_response(prompt, llm_vars["LLM_MODEL"], llm_vars["API_KEY"], llm_vars["BASE_URL"], 0)
+            print("RESPONSE")
+            print(response)
+            return response
         except Exception as e:
             print(
                 f"Failed to generate analysis for suggestion ai outline. Exception type: {type(e).__name__}, Message: {str(e)}"
             )
-    return {}
+    return ""
 
-async def article_gen_ai_analysis(context_data: dict):
+async def article_gen_ai_analysis(context_data: dict, selected_llm: str):
     print("ANALYZING data for article gen")
     if not context_data:
         raise ValueError("context_data is None or empty")
@@ -228,6 +224,8 @@ async def article_gen_ai_analysis(context_data: dict):
    
     print("context_data keys")
     print(data.keys())
+
+    llm_vars = set_llm_variables(selected_llm)
     
     for section in article_outline:
         print("section", section)
@@ -249,7 +247,7 @@ async def article_gen_ai_analysis(context_data: dict):
                     USER_PROMPT=user_prompt
                 )
                 print("awaiting Ai ARTICLE")
-                async for chunk in generate_response_stream(prompt, LLM_MODEL, API_KEY, BASE_URL, 0):
+                async for chunk in generate_response_stream(prompt, llm_vars["LLM_MODEL"], llm_vars["API_KEY"], llm_vars["BASE_URL"], 0):
                     print(chunk)
                     yield chunk
             except Exception as e:
@@ -371,11 +369,13 @@ async def combine_headings(urls):
     return all_headings
 
 async def invoke_perplexity(prompt):
+
+
     response = await generate_response(
         user_prompt=prompt,
-        model=PERPLEXITY_MODEL,
-        api_key=PERPLEXITY_API_KEY,
-        base_url=PERPLEXITY_BASE_URL
+        model=os.getenv('PERPLEXITY_MODEL'),
+        api_key=os.getenv('PERPLEXITY_API_KEY'),
+        base_url=os.getenv('PERPLEXITY_BASE_URL')
     )
     return response
 
@@ -419,6 +419,3 @@ async def perplexity_ai_analysis(context_data: dict):
             print(f"Failed to generate analysis for suggestion ai outline. Exception type: {type(e).__name__}, Message: {str(e)}")
         
     return {}
-
-if __name__ == "__main__":
-    asyncio.run(invoke_perplexity("What is the capital of France?"))

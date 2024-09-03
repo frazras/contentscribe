@@ -2,23 +2,12 @@ from fastapi import APIRouter, Request, Response, HTTPException
 from fastapi.responses import JSONResponse, StreamingResponse
 import asyncio
 import json
-from .keygen import get_keyword_data, combine_headings, title_gen_ai_analysis, outline_gen_ai_analysis, article_gen_ai_analysis, perplexity_ai_analysis, invoke_perplexity
+from .keygen import get_keyword_data, combine_headings, title_gen_ai_analysis, outline_gen_ai_analysis, article_gen_ai_analysis, perplexity_ai_analysis, suggestions_ai_analysis
 from .llm import generate_response_stream
 import requests
 from tavily import TavilyClient
 import os
-from dotenv import load_dotenv
-
-# Load environment variables from .env file
-load_dotenv()
-
-# Access variables securely
-LLM_MODEL = os.getenv('LLM_MODEL', 'gpt-4o')  # Smart AI
-LLM_MODEL_B = os.getenv('LLM_MODEL_B', 'gpt-3.5-turbo')  # Fast AI
-API_KEY = os.getenv('API_KEY')
-API_KEY_B = os.getenv('API_KEY_B', API_KEY)
-BASE_URL = os.getenv('BASE_URL', 'https://api.openai.com/v1')
-BASE_URL_B = os.getenv('BASE_URL_B', BASE_URL)
+import httpx
 
 router = APIRouter()
 
@@ -43,8 +32,16 @@ async def generate_keywords(request: Request):
         keyword_data = await get_keyword_data(input_keyword, country)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+    ai_report = await suggestions_ai_analysis(keyword_data, selected_llm)
+    print(ai_report)
+
+    # Preparing the result
+    result = {
+        "success": True,
+        "results": ai_report,
+    }
     
-    return JSONResponse(content=keyword_data)
+    return JSONResponse(content=result)
 
 @router.post('/serpscrape')
 async def generate_title(request: Request):
@@ -123,7 +120,7 @@ async def new_title_gen(request: Request):
     data = await request.json()
     selected_llm = data.get('selectedLLM')  # Scan for selectedLLM
     print(f"Selected LLM: {selected_llm}")  # Print the selected LLM
-    titles = await title_gen_ai_analysis(data)
+    titles = await title_gen_ai_analysis(data, selected_llm)
     return {"success": True, "results": titles}
 
 @router.post('/outlinegen')
@@ -131,7 +128,7 @@ async def outline_gen(request: Request):
     data = await request.json()
     selected_llm = data.get('selectedLLM')  # Scan for selectedLLM
     print(f"Selected LLM: {selected_llm}")  # Print the selected LLM
-    outline = await outline_gen_ai_analysis(data)
+    outline = await outline_gen_ai_analysis(data, selected_llm)
     return {"success": True, "results": outline}
 
 @router.post('/articlegen')
@@ -149,7 +146,7 @@ async def article_gen(request: Request):
 
     async def generate():
         try:
-            async for chunk in article_gen_ai_analysis(data):
+            async for chunk in article_gen_ai_analysis(data, selected_llm):
                 yield chunk.encode('utf-8')
         except Exception as e:
             print(f"Error in article generation: {str(e)}")
@@ -160,7 +157,55 @@ async def article_gen(request: Request):
 @router.post('/articlebrief')
 async def article_brief(request: Request):
     data = await request.json()
-    selected_llm = data.get('selectedLLM')  # Scan for selectedLLM
-    print(f"Selected LLM: {selected_llm}")  # Print the selected LLM
     brief = await perplexity_ai_analysis(data)
     return {"success": True, "results": brief}
+
+@router.post('/anthropic')
+async def anthropic_endpoint(request: Request):
+    data = await request.json()
+    user_message = data.get('message')
+    # escape the message
+    user_message = user_message.replace('"', '')
+    if not user_message:
+        raise HTTPException(status_code=400, detail="Message is required.")
+
+    headers = {
+        "Content-Type": "application/json",
+        "x-api-key": os.environ.get("ANTHROPIC_API_KEY"),
+        "anthropic-version": "2023-06-01"
+    }
+
+    payload = {
+        "model": "claude-3-5-sonnet-20240620",
+        "max_tokens": 1000,
+        "messages": [
+            {
+                "role": "user",
+                "content": user_message
+            }
+        ]
+    }
+
+    MAX_RETRIES = 5
+    RETRY_DELAY = 1
+
+    async with httpx.AsyncClient() as client:
+        for attempt in range(MAX_RETRIES):
+            print(f"Attempt {attempt + 1} of {MAX_RETRIES}")
+            try:
+                response = await client.post(
+                    "https://api.anthropic.com/v1/messages",
+                    headers=headers,
+                    json=payload
+                )
+                response.raise_for_status()
+                result = response.json()
+                return {"success": True, "response": result['content'][0]['text']}
+            except httpx.HTTPStatusError as e:
+                if attempt == MAX_RETRIES - 1:
+                    raise HTTPException(status_code=e.response.status_code, detail=f"Error from Anthropic API: {e.response.text}")
+                await asyncio.sleep(RETRY_DELAY * (2 ** attempt))
+            except Exception as e:
+                if attempt == MAX_RETRIES - 1:
+                    raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}")
+                await asyncio.sleep(RETRY_DELAY * (2 ** attempt))

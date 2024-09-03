@@ -12,6 +12,7 @@ function App() {
   const [modules, setModules] = useState([]);
   const [stepData, setStepData] = useState({});
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const serverUrl = window.location.origin;
   const apiBasePath = '/api';
 
@@ -19,8 +20,15 @@ function App() {
   axios.defaults.headers.post['Content-Type'] = 'application/json';
 
   const globalData = useRef({});
-  const [selectedLLM, setSelectedLLM] = useState('Google Gemini');
-  const llmOptions = ['Google Gemini', 'OpenAI', 'Anthropic'];
+  const [selectedLLM, setSelectedLLM] = useState(() => {
+    const savedLLM = localStorage.getItem('selectedLLM');
+    return savedLLM || 'gemini';
+  });
+  const llmOptions = [
+    { name: 'Google Gemini', key: 'gemini' },
+    { name: 'OpenAI', key: 'openai' },
+    { name: 'Anthropic (Experimental)', key: 'anthropic' }
+  ];
 
   useEffect(() => {
     const fetchModules = async () => {
@@ -48,6 +56,7 @@ function App() {
 
   useEffect(() => {
     globalData.current.selectedLLM = selectedLLM;
+    localStorage.setItem('selectedLLM', selectedLLM);
     console.log("Selected LLM Global Data:DN " + globalData.current.selectedLLM);
     console.log(globalData.current);
   }, [selectedLLM]);
@@ -157,10 +166,20 @@ function App() {
         setStepData(response.data.results);
         console.log("response", response);
       }
-
-
     } catch (error) {
       console.error(`Axios Failed to call API for step ${step}, ${endpoint}`, error);
+      if (error.response) {
+        console.log("first")
+        // The request was made and the server responded with a status code
+        // that falls out of the range of 2xx
+        setError(`Error ${error.response.status}: ${error.response.data}`);
+      } else if (error.request) {
+        // The request was made but no response was received
+        setError("No response received from server. Please try again later.");
+      } else {
+        // Something happened in setting up the request that triggered an Error
+        setError(`Error: ${error.message}`);
+      }
       return;
     }
     console.log("GlobalData", globalData.current);
@@ -195,9 +214,16 @@ function App() {
     const updatedModules = [...modules];
     const nextModuleIndex = updatedModules.findIndex(mod => mod.order === nextStepNumber);
     if (nextModuleIndex !== -1) {
+      let updatedExecutionTime = executionTime || updatedModules[nextModuleIndex].executionTime;
+      
+      // If the selected LLM is OpenAI, increase execution time by 25%
+      if (selectedLLM === 'openai') {
+        updatedExecutionTime *= 1.25;
+      }
+
       updatedModules[nextModuleIndex] = {
         ...updatedModules[nextModuleIndex],
-        executionTime: executionTime || updatedModules[nextModuleIndex].executionTime
+        executionTime: updatedExecutionTime
       };
       setModules(updatedModules);
     }
@@ -223,7 +249,7 @@ function App() {
               className="p-2 border border-gray-300 rounded-md mr-12"
             >
               {llmOptions.map((llm) => (
-                <option key={llm} value={llm}>{llm}</option>
+                <option key={llm.key} value={llm.key}>{llm.name}</option>
               ))}
             </select>
           </div>
@@ -263,6 +289,28 @@ function App() {
             allExpanded={false} 
             style={darkStyles} 
           />
+        </div>
+      )}
+      {error && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full" id="my-modal">
+          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div className="mt-3 text-center">
+              <h3 className="text-lg leading-6 font-medium text-gray-900">Error</h3>
+              <div className="mt-2 px-7 py-3">
+                <p className="text-sm text-gray-500" dangerouslySetInnerHTML={{ __html: error }} />
+                <p className="text-sm text-gray-500">You may need to reload the page.</p>
+              </div>
+              <div className="items-center px-4 py-3">
+                <button
+                  id="ok-btn"
+                  className="px-4 py-2 bg-blue-500 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                  onClick={() => setError(null)}
+                >
+                  OK
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>
