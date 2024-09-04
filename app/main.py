@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from .routes import router as main_router
+import os
 
 app = FastAPI()
 
@@ -15,4 +16,15 @@ app.add_middleware(
 )
 
 app.include_router(main_router, prefix="/api")
-app.mount("/", StaticFiles(directory="ui/build", html=True), name="static")
+
+# Check if the 'ui/build' directory exists
+if os.path.exists("ui/build"):
+    app.mount("/", StaticFiles(directory="ui/build", html=True), name="static")
+else:
+    print("Warning: 'ui/build' directory does not exist. Static files will not be served.")
+
+# Show the contents of the current folder
+current_dir = os.path.dirname(os.path.abspath(__file__))
+print("Contents of the current folder:")
+for item in os.listdir(current_dir):
+    print(f"- {item}")
