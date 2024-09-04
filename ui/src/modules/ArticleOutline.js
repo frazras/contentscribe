@@ -3,7 +3,7 @@ import { Disclosure } from '@headlessui/react';
 import { ChevronRightIcon, ArrowsUpDownIcon, PencilSquareIcon } from '@heroicons/react/24/outline';
 import { DndProvider, useDrag, useDrop } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
-import ProgressBar from '../lib/ProgressBar';
+import ProgressBar from '../components/ProgressBar';
 
 const Section = ({ section, index, moveSection }) => {
   const ref = React.useRef(null);

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import ProgressBar from '../lib/ProgressBar';
+import ProgressBar from '../components/ProgressBar';
 
 function MainKeyword({ nextStep, stepData, nextModule }) {
   const [inputKeyword, setInputKeyword] = useState('How to Make Money Online');

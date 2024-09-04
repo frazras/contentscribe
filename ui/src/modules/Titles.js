@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import ProgressBar from '../lib/ProgressBar';
+import ProgressBar from '../components/ProgressBar';
 
 function Titles({ nextStep, stepData, nextModule }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
