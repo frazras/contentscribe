@@ -11,7 +11,7 @@ function Titles({ nextStep, stepData, nextModule }) {
   useEffect(() => {
     console.log('Titles Stepdata on load:', stepData);
     console.log('Next Module:', nextModule);
-  }, [stepData]);
+  }, [stepData, nextModule]);
 
   const handleTitleChange = (title) => {
     setSelectedTitle(title);
