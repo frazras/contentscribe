@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import ProgressBar from 'lib/Progressbar';
+import ProgressBar from '../lib/ProgressBar';
 
 function SimilarArticles({ nextStep, stepData, nextModule }) {
   const [selectedArticles, setSelectedArticles] = useState([]);
