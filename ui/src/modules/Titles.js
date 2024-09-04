@@ -1,50 +1,35 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
+import ProgressBar from '../lib/Progressbar';
 
-function StepFive({ nextStep, stepData }) {
+function Titles({ nextStep, stepData, nextModule }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedTitle, setSelectedTitle] = useState('');
   const [customTitle, setCustomTitle] = useState('');
   const [useCustomTitle, setUseCustomTitle] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const [bars, setBars] = useState("░");
-  const progressInterval = useRef(null);
+  const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
     console.log('Titles Stepdata on load:', stepData);
+    console.log('Next Module:', nextModule);
   }, [stepData]);
 
   const handleTitleChange = (title) => {
     setSelectedTitle(title);
+    setErrorMessage('');
   };
 
   const handleSubmit = async () => {
+    if (!useCustomTitle && !selectedTitle) {
+      setErrorMessage("Please select a title or create a custom title.");
+      return;
+    }
+    if (useCustomTitle && !customTitle) {
+      setErrorMessage("Please enter your custom title.");
+      return;
+    }
     setIsSubmitting(true);
-    initProgressBar();
-    const submissionData = useCustomTitle && customTitle ? { customTitle } : { selectedTitle };
-    await nextStep({ ...stepData, ...submissionData });
+    await nextStep({ customTitle: customTitle, selectedTitle: selectedTitle });
   };
-
-  const initProgressBar = () => {
-    let intervalDuration = 200; // 50 seconds for demo purposes
-    progressInterval.current = setInterval(() => {
-      setProgress((prevProgress) => {
-        const newProgress = prevProgress < 100 ? prevProgress + 1 : 100;
-        if (newProgress === 100) {
-          clearInterval(progressInterval.current);
-          setBars("░".repeat(41)); // Assuming 41 bars represent 100%
-          console.log("progress complete");
-        } else if (newProgress % 5 === 0) {
-          setBars((prevBars) => prevBars + "░░");
-          console.log("progress", newProgress);
-        }
-        return newProgress;
-      });
-    }, intervalDuration);
-  };
-
-  useEffect(() => {
-    return () => clearInterval(progressInterval.current);
-  }, []);
 
   return (
     <div>
@@ -77,6 +62,7 @@ function StepFive({ nextStep, stepData }) {
               if (e.target.checked) {
                 setSelectedTitle('');
               }
+              setErrorMessage('');
             }}
             className="form-checkbox"
           />
@@ -89,16 +75,25 @@ function StepFive({ nextStep, stepData }) {
           <input
             type="text"
             value={customTitle}
-            onChange={(e) => setCustomTitle(e.target.value)}
+            onChange={(e) => {
+              setCustomTitle(e.target.value);
+              setErrorMessage('');
+            }}
             placeholder="Enter your custom title here"
             className="w-full p-2 border border-gray-300 rounded"
           />
         </div>
       )}
 
+      {errorMessage && (
+        <div className="text-red-500 mb-4">
+          {errorMessage}
+        </div>
+      )}
+
       <div className="flex justify-end mt-4">
         <button
-          className={`px-4 py-2 ${isSubmitting ? 'bg-blue-300' : 'bg-blue-500 hover:bg-blue-700'} text-white rounded transition-colors`}
+          className={`px-4 py-2 ${isSubmitting ? 'bg-gray-500' : 'bg-blue-500 hover:bg-blue-700'} text-white rounded transition-colors`}
           onClick={handleSubmit}
           disabled={isSubmitting}
         >
@@ -110,23 +105,17 @@ function StepFive({ nextStep, stepData }) {
               </svg>
               Processing...
             </div>
-          ) : (
-            'Add Article Brief'
-          )}
+          ) : nextModule.buttonLabel ? nextModule.buttonLabel : 'Next'}
         </button>
       </div>
-      {isSubmitting && (
-        <>
-          <div className="mt-5">
-            <div className="progress-bar">
-              <div className="bg-blue-500 h-1" style={{ width: `${progress}%` }}></div>
-              {bars}{progress}%
-            </div>
-          </div>
-        </>
+      {isSubmitting && nextModule.hasProgressBar && (
+        <ProgressBar 
+          executionTime={nextModule.executionTime} 
+          renderProgressMessage={nextModule.renderProgressMessage} 
+        />
       )}
     </div>
   );
 }
 
-export default StepFive;
+export default Titles;

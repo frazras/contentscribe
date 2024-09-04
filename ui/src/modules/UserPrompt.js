@@ -1,34 +1,35 @@
 import React, { useState, useEffect } from 'react';
+import ProgressBar from '../lib/Progressbar';
 
-function ArticleBrief({ nextStep, stepData }) {
+function UserPrompt({ nextStep, stepData, nextModule }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [articleBrief, setArticleBrief] = useState('');
+  const [userPrompt, setUserPrompt] = useState('');
 
   useEffect(() => {
-    console.log('Stepdata on load:', stepData);
+    console.log('UserPrompt Stepdata on load:', stepData);
   }, [stepData]);
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
-    await nextStep({ ...stepData, articleBrief });
+    await nextStep({ userPrompt });
   };
 
   return (
     <div>
-      <h2 className="text-lg font-semibold mb-4">Enter an Article Brief</h2>
-      <p className="mb-4">Provide a specific detail about the article you want to create. Instruct the AI by outlining specific details including examples and formatting structure.</p>
+      <h2 className="text-lg font-semibold mb-4">Enter Your Prompt</h2>
+      <p className="mb-4">Provide specific directions for the article you want to create. Instruct the AI by outlining specific details, including examples and formatting structure, as if you were prompting ChatGPT.</p>
 
       <textarea
-        value={articleBrief}
-        onChange={(e) => setArticleBrief(e.target.value)}
-        placeholder="Enter your article brief here"
+        value={userPrompt}
+        onChange={(e) => setUserPrompt(e.target.value)}
+        placeholder="Enter your prompt here"
         className="w-full p-2 border border-gray-300 rounded mb-4"
         rows="6"
       />
 
       <div className="flex justify-end mt-4">
         <button
-          className={`px-4 py-2 ${isSubmitting ? 'bg-blue-300' : 'bg-blue-500 hover:bg-blue-700'} text-white rounded transition-colors`}
+          className={`px-4 py-2 ${isSubmitting ? 'bg-gray-500' : 'bg-blue-500 hover:bg-blue-700'} text-white rounded transition-colors`}
           onClick={handleSubmit}
           disabled={isSubmitting}
         >
@@ -40,13 +41,17 @@ function ArticleBrief({ nextStep, stepData }) {
               </svg>
               Processing...
             </div>
-          ) : (
-            'Create Article Outline'
-          )}
+          ) : nextModule.buttonLabel}
         </button>
       </div>
+      {isSubmitting && nextModule.hasProgressBar && (
+        <ProgressBar 
+          executionTime={nextModule.executionTime} 
+          renderProgressMessage={nextModule.renderProgressMessage} 
+        />
+      )}
     </div>
   );
 }
 
-export default ArticleBrief;
+export default UserPrompt;

@@ -1,11 +1,20 @@
-from flask import Flask
-from flask_cors import CORS
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 def create_app():
-    app = Flask(__name__)
-    CORS(app)  # Enable CORS for all domains
+    app = FastAPI()
 
-    from .routes import main
-    app.register_blueprint(main)
+    # Enable CORS for all domains
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+
+    # Import and include your routes here
+    from .routes import router
+    app.include_router(router)
 
     return app
