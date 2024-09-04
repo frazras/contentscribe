@@ -17,3 +17,4 @@ fastapi-cli==0.0.4
 uvicorn==0.15.0
 google-generativeai==0.7.2
 anthropic==0.34.1
+httptools==0.2.0
