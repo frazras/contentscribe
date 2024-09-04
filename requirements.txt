@@ -3,9 +3,6 @@ openai==1.30.5
 pandas==2.2.1
 Requests==2.31.0
 urllib3==1.26.6
-Flask[async]==3.0.2
-flask-cors==4.0.0
-gunicorn==21.2.0
 packaging==24.0
 gevent==24.2.1
 beautifulsoup4==4.12.3
@@ -16,5 +13,4 @@ fastapi==0.111.0
 fastapi-cli==0.0.4
 uvicorn==0.15.0
 google-generativeai==0.7.2
-anthropic==0.34.1
-httptools==0.2.0
+httptools==0.6.0
