@@ -13,9 +13,10 @@ router = APIRouter()
 
 url = "https://google.serper.dev/search"
 
-@router.get('/api')
-async def api_root():
-    return {"message": "API Root"}
+@router.post('/health')
+@router.get('/health')
+async def api_healthcheck():
+    return {"message": "API is healthy and Strong 💪"}
 
 @router.post('/keygen')
 async def generate_keywords(request: Request):
