@@ -23,4 +23,6 @@ if os.path.exists(current_dir + "/ui/build"):
     app.mount("/", StaticFiles(directory=current_dir + "/ui/build", html=True), name="static")
     print("Mounted / at " + current_dir + "/ui/build")
 else:
+    #warning with full directory path
     print("Warning: 'ui/build' directory does not exist. Static files will not be served.")
+    print("Full path: " + current_dir + "/ui/build")
