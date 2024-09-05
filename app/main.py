@@ -18,13 +18,9 @@ app.add_middleware(
 app.include_router(main_router, prefix="/api")
 
 # Check if the 'ui/build' directory exists
-if os.path.exists("ui/build"):
-    app.mount("/", StaticFiles(directory="ui/build", html=True), name="static")
+current_dir = os.path.dirname(os.path.abspath(__file__))
+if os.path.exists(current_dir + "/ui/build"):
+    app.mount("/", StaticFiles(directory=current_dir + "/ui/build", html=True), name="static")
+    print("Mounted / at " + current_dir + "/ui/build")
 else:
     print("Warning: 'ui/build' directory does not exist. Static files will not be served.")
-
-# Show the contents of the current folder
-current_dir = os.path.dirname(os.path.abspath(__file__))
-print("Contents of the current folder:")
-for item in os.listdir(current_dir):
-    print(f"- {item}")
