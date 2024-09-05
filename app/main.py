@@ -24,5 +24,18 @@ if os.path.exists(current_dir + "/ui/build"):
     print("Mounted / at " + current_dir + "/ui/build")
 else:
     #warning with full directory path
-    print("Warning: 'ui/build' directory does not exist. Static files will not be served.")
-    print("Full path: " + current_dir + "/ui/build")
+    print("Warning: '" + current_dir + "/ui/build' directory does not exist. Static files will not be served.")
+    # Show the contents of the current folder
+
+print("Contents of the current folder:")
+for item in os.listdir(current_dir):
+    item_path = os.path.join(current_dir, item)
+    if os.path.isdir(item_path):
+        print(f"Directory: {item}")
+        #print python code to do  os.path.exists(item_path)
+        print(f"Does {item_path} exist? {os.path.exists(item_path)}")
+        print(f"Contents of directory {item}:")
+        for sub_item in os.listdir(item_path):
+            print(f"  - {sub_item}")
+    else:
+        print(f"File: {item}")
