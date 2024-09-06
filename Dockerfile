@@ -14,6 +14,10 @@ COPY . /app
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Change to the app directory
+WORKDIR /app/app
+
+
 # Install Node.js dependencies and build the React app
 RUN if [ -d "ui" ]; then \
         cd ui && \
