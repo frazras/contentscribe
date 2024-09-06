@@ -14,16 +14,12 @@ COPY . /app
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Change to the app directory
-WORKDIR /app/app
-
-
 # Install Node.js dependencies and build the React app
-RUN if [ -d "ui" ]; then \
-        cd ui && \
+RUN if [ -d "app/ui" ]; then \
+        cd app/ui && \
         npm install && \
         npm run build && \
-        cd ..; \
+        cd ../..; \
     else \
         echo "ui directory not found"; \
     fi
@@ -35,4 +31,4 @@ EXPOSE 8000
 ENV PORT=8000
 
 # Run the application
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
