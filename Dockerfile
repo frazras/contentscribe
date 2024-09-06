@@ -30,5 +30,5 @@ EXPOSE 8000
 # Define environment variable
 ENV PORT=8000
 
-# Run the application
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Run the application with increased timeout and workers
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--timeout-keep-alive", "75", "--workers", "4"]
