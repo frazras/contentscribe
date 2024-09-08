@@ -410,11 +410,7 @@ async def perplexity_ai_analysis(context_data: dict):
             print(prompt)
             response = await invoke_perplexity(prompt)
             if response:
-                try:
-                    return json_repair.loads(response)
-                except json.JSONDecodeError as e:
-                    print(f"JSON decoding failed: {str(e)} - Response was: '{response}'")
-                    return {}
+                return response
         except Exception as e:
             print(f"Failed to generate analysis for suggestion ai outline. Exception type: {type(e).__name__}, Message: {str(e)}")
         
