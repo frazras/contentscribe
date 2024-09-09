@@ -5,6 +5,7 @@ function ArticleGeneration({ nextStep, globalData }) {
   const [articleContent, setArticleContent] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState('');
+  const [showGenerateButton, setShowGenerateButton] = useState(true);
   const abortControllerRef = useRef(null);
   const articleContentRef = useRef(null); // Reference to the article content div
   const [autoScroll, setAutoScroll] = useState(true); // State to control auto-scrolling
@@ -18,6 +19,7 @@ function ArticleGeneration({ nextStep, globalData }) {
       setIsGenerating(true);
       setError('');
       setArticleContent('');
+      setShowGenerateButton(false);
       abortControllerRef.current = new AbortController();
       
       try {
@@ -100,6 +102,14 @@ function ArticleGeneration({ nextStep, globalData }) {
 
   return (
     <div>
+      {showGenerateButton && (
+        <button 
+          className="bg-blue-500 text-white px-4 py-2 rounded mb-4"
+          onClick={handleGenerateArticle}
+        >
+          Generate Article
+        </button>
+      )}
       
       <div 
         className="overflow-y-scroll h-96 border border-gray-300 rounded px-4 py-2 mb-4 article-content"
@@ -119,15 +129,17 @@ function ArticleGeneration({ nextStep, globalData }) {
       <button 
         className="bg-green-600 text-white px-4 py-2 rounded"
         onClick={() => {nextStep({ reset: true }); console.log("resetted");}} // Assuming nextStep can handle a reset action
-        >
+      >
         Go Back to Beginning!
       </button>
-      <button 
-        className="bg-yellow-500 text-white px-4 py-2 rounded mt-4"
-        onClick={handleGenerateArticle}
-      >
-        {isGenerating ? 'Stop Generation' : 'Regenerate Article'}
-      </button>
+      {!showGenerateButton && (
+        <button 
+          className="bg-yellow-500 text-white px-4 py-2 rounded mt-4"
+          onClick={handleGenerateArticle}
+        >
+          {isGenerating ? 'Stop Generation' : 'Regenerate Article'}
+        </button>
+      )}
     </div>
   );
 }
