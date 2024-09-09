@@ -23,7 +23,11 @@ function ArticleGeneration({ nextStep, globalData }) {
       abortControllerRef.current = new AbortController();
       
       try {
-        const response = await fetch(`/api/articlegen`, {
+        // Check if the request is originating from port 3000
+        const port = window.location.port;
+        const apiUrl = port === '3000' ? 'http://localhost:8000/api/articlegen' : '/api/articlegen';
+
+        const response = await fetch(apiUrl, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
