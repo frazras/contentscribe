@@ -5,7 +5,7 @@ FROM node:lts AS react-builder
 WORKDIR /app/ui
 
 # Copy the React app files
-COPY ui /app/ui
+COPY app/ui /app/ui
 
 # Install dependencies and build the React app
 RUN npm install && npm run build
@@ -21,6 +21,11 @@ COPY . /app
 
 # Copy the built React app from the previous stage
 COPY --from=react-builder /app/ui/build /app/ui/build
+# Show the contents of app/ui and app/ui/build
+RUN echo "Contents of app/ui:" && \
+    ls -R /app/ui && \
+    echo "Contents of app/ui/build:" && \
+    ls -R /app/ui/build
 
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
