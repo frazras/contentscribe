@@ -5,7 +5,7 @@ FROM node:lts AS react-builder
 WORKDIR /app/ui
 
 # Copy the React app files
-COPY app/ui /app/ui
+COPY ui /app/ui
 
 # Install dependencies and build the React app
 RUN npm install && npm run build
