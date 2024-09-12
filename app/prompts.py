@@ -121,6 +121,9 @@ Write using the dependency grammar linguistic framework instead of the phrase st
 Additionally, ensure there is diversity in the writing style and tone. 
 Write at a Flesch-Kincaid 8th-grade reading level.
 
+# Intent
+Your writing style should lean more towards being more informational and less poetic. Do not write with fluff, only include information that is relevant to the topic. It is better to have a shorter article with more information than a longer. fluffy, roundabout article.
+
 # Avoid the appearance of robotic, generated content, humanize the content.
 Replace at least 10% of the "&" with the "and" symbol randomly throughout. Introduce 50/50 variations between british and american spellings. Don't use perfect punctuation, but remain gramatically and semantically correct; 
 Write as if the the content is spoken text from a conversation transcript rather than written text with perfect planning.
