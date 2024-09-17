@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import ProgressBar from '../components/ProgressBar';
 
 function MainKeyword({ nextStep, stepData, nextModule }) {
-  const [inputKeyword, setInputKeyword] = useState('How to Make Money Online');
+  const [inputKeyword, setInputKeyword] = useState('How to Make Money Blogging?');
   const [isInputKeywordValid, setIsInputKeywordValid] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
