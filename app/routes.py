@@ -8,6 +8,7 @@ import requests
 from tavily import TavilyClient
 import os
 import httpx
+import json_repair
 
 router = APIRouter()
 
@@ -22,8 +23,8 @@ async def api_healthcheck():
 async def generate_keywords(request: Request):
     data = await request.json()
     input_keyword = data.get('input_keyword')
-    selected_llm = data.get('selectedLLM')  # Scan for selectedLLM
-    print(f"Selected LLM: {selected_llm}")  # Print the selected LLM
+    selected_llm = data.get('selectedLLM')
+    print(f"Selected LLM: {selected_llm}")
     if not input_keyword:
         raise HTTPException(status_code=400, detail="Keyword is required.")
     
@@ -33,10 +34,17 @@ async def generate_keywords(request: Request):
         keyword_data = await get_keyword_data(input_keyword, country)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+    
     ai_report = await suggestions_ai_analysis(keyword_data, selected_llm)
-    print(ai_report)
+    print("AI Report received:", ai_report)
 
-    # Preparing the result
+    # Handle potential string response from Gemini
+    if isinstance(ai_report, str):
+        try:
+            ai_report = json_repair.loads(ai_report)
+        except json_repair.JSONDecodeError:
+            ai_report = {"error": "Failed to parse Gemini response as JSON"}
+
     result = {
         "success": True,
         "results": ai_report,
@@ -148,6 +156,7 @@ async def article_gen(request: Request):
     async def generate():
         try:
             async for chunk in article_gen_ai_analysis(data, selected_llm):
+                print("Received chunk:", chunk)  # Add this line for debugging
                 yield chunk.encode('utf-8')
         except Exception as e:
             print(f"Error in article generation: {str(e)}")

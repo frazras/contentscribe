@@ -1,5 +1,6 @@
 from openai import AsyncOpenAI
 import google.generativeai as genai
+from google.generativeai.types import GenerationConfig
 import asyncio
 import json_repair
 import httpx
@@ -90,21 +91,8 @@ async def generate_response(user_prompt, model, api_key, base_url="https://api.o
                     api_params["response_format"] = {"type": "json_object"}
 
             if "googleapis.com" in base_url:
-                print(f"Using Google API. Model: {model}")
-                genai.configure(api_key=api_key)
-                model = genai.GenerativeModel(model)
-                response = model.generate_content(
-                    user_prompt,
-                    generation_config={"response_mime_type": "application/json"}
-                )
-                try:
-                    return json_repair.loads(response.text)
-                except Exception as e:
-                    print(f"JSON decoding failed: {str(e)} - Response was: '{response.text}'")
-                    if attempt < MAX_RETRIES - 1:
-                        await asyncio.sleep(1 * (2 ** attempt))
-                        continue
-                    return {}
+                print(f"Using Google Gemini API. Model: {model}")
+                return await generate_gemini_response(user_prompt, model, api_key, temperature)
             
             if "anthropic.com" in base_url:
                 print(f"Using Anthropic API. Model: {model}")
@@ -161,14 +149,9 @@ async def generate_response_stream(user_prompt, model, api_key, base_url="https:
                 api_params_stream["response_format"] = {"type": "json_object"}
             
             if "googleapis.com" in base_url:
-                print(f"Using Google API (stream). Model: {model}")
-                genai.configure(api_key=api_key)
-                model = genai.GenerativeModel(model)
-                async for chunk in await model.generate_content_async(
-                    user_prompt,
-                    stream=True
-                ):
-                    yield chunk.text
+                print(f"Using Google Gemini API (stream). Model: {model}")
+                async for chunk in generate_gemini_stream(user_prompt, model, api_key, temperature):
+                    yield chunk
             elif "anthropic.com" in base_url:
                 print(f"Using Anthropic API (stream). Model: {model}")
                 async for chunk in generate_anthropic_stream(user_prompt, model, api_key):
@@ -188,3 +171,61 @@ async def generate_response_stream(user_prompt, model, api_key, base_url="https:
                 print(f"Stream exception after max retries: {e}")
                 return
     print("Stream finished")
+
+async def generate_gemini_response(user_prompt, model, api_key, temperature=0.7):
+    genai.configure(api_key=api_key)
+    model = genai.GenerativeModel(model_name=model)
+    
+    generation_config = GenerationConfig(
+        temperature=temperature,
+        top_p=1,
+        top_k=1,
+        max_output_tokens=2048,
+    )
+    
+    safety_settings = [
+        {
+            "category": "HARM_CATEGORY_HARASSMENT",
+            "threshold": "BLOCK_MEDIUM_AND_ABOVE"
+        },
+        {
+            "category": "HARM_CATEGORY_HATE_SPEECH",
+            "threshold": "BLOCK_MEDIUM_AND_ABOVE"
+        },
+        {
+            "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+            "threshold": "BLOCK_MEDIUM_AND_ABOVE"
+        },
+        {
+            "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
+            "threshold": "BLOCK_MEDIUM_AND_ABOVE"
+        },
+    ]
+    
+    response = model.generate_content(
+        user_prompt,
+        generation_config=generation_config,
+        safety_settings=safety_settings,
+    )
+    
+    return json_repair.loads(response.text)
+
+async def generate_gemini_stream(user_prompt, model, api_key, temperature=0.7):
+    genai.configure(api_key=api_key)
+    model = genai.GenerativeModel(model_name=model)
+    
+    generation_config = GenerationConfig(
+        temperature=temperature,
+        top_p=1,
+        top_k=1,
+        max_output_tokens=2048,
+    )
+    
+    response = model.generate_content(
+        user_prompt,
+        generation_config=generation_config,
+        stream=True
+    )
+    
+    async for chunk in response:
+        yield chunk.text
