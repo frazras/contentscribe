@@ -6,6 +6,7 @@ import 'react-json-view-lite/dist/index.css';
 import moduleData, { debug } from './moduleData';
 import debugdata from './debug';
 import { DEBUG_MODE } from './config'; // Import the debug mode setting
+import CompletionProgress from './components/CompletionProgress';
 
 function App() {
   const [currentStep, setCurrentStep] = useState(0);
@@ -34,8 +35,13 @@ function App() {
     const fetchModules = async () => {
       const importedModules = await Promise.all(
         moduleData.map(async (module) => {
-          const importedModule = await import(`./modules/${module.component}`);
-          return { ...module, code: importedModule.default };
+          try {
+            const importedModule = await import(`./modules/${module.component}`);
+            return { ...module, code: importedModule.default };
+          } catch (error) {
+            console.error(`Failed to import module ${module.component}:`, error);
+            return { ...module, code: null };
+          }
         })
       );
 
@@ -254,6 +260,10 @@ function App() {
             </select>
           </div>
         </div>
+        
+        {/* Add the CompletionProgress component here */}
+        <CompletionProgress currentStep={currentStep} />
+        
         <div className="flex-grow flex items-center justify-center">
           <div className="max-w-xl mx-auto p-8 bg-white border border-gray-300 rounded-lg shadow-lg text-left">
             {loading ? (
@@ -265,7 +275,7 @@ function App() {
               </div>
             ) : (
               modules.map((module, index) => (
-                currentStep === index && React.createElement(module.code, {
+                currentStep === index && module.code && React.createElement(module.code, {
                   key: module.order,
                   prevStep: prevStep,
                   nextStep: nextStep,
