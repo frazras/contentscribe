@@ -16,7 +16,7 @@ const moduleData = [
     prerequisites: ["MainKeyword"],
     executionTime: 60,
     hasProgressBar: true,
-    buttonLabel: "Perform Keyword Research",
+    buttonLabel: "Do Keyword Research",
     renderProgressMessage: {
       5: "Analyzing Keywords...",
       10: "Generating Keyword Variations...",

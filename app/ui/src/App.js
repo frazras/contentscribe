@@ -192,15 +192,22 @@ function App() {
     setCurrentStep(step);
   };
 
-  const nextStep = (params, executionTime, reset) => {
+  const nextStep = (params, executionTime, reset, stepNumber) => {
     console.log("Reset", reset);
     if (reset) {
       globalData.current = {};
       setStepData({});
       setCurrentStep(0);
     } 
-    const nextStepNumber = currentStep + 1;
+
+    let nextStepNumber;
+    if (stepNumber) {
+      nextStepNumber = stepNumber;
+    } else {
+      nextStepNumber = currentStep + 1;
+    }
     
+    console.log("Next Step Number", nextStepNumber);
     const nextModule = modules.find(mod => mod.order === nextStepNumber);
     console.log(debug);
     const shouldCallApi = debug.some(item => item.component === nextModule?.component);

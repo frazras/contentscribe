@@ -35,20 +35,28 @@ function Titles({ nextStep, stepData, nextModule }) {
     <div>
       <h2 className="text-lg font-semibold mb-4">Select a Title</h2>
       <p className="mb-4">These titles are suggested based on the topic and titles we found. <br /> 
-      Choose the Title that best suits your article or create a custom title below.</p>
+      <strong>Choose the Title</strong> that best suits your article or create a custom title below.</p>
       
-      <div className="overflow-y-scroll h-64 border border-gray-300 rounded px-4 py-2 mb-4">
+      <div className="overflow-y-auto h-64 mb-4">
         {stepData?.titles ? stepData.titles.map((title, index) => (
-          <label key={index} className="block">
-            <input
-              type="radio"
-              name="titleSelection"
-              checked={selectedTitle === title}
-              onChange={() => handleTitleChange(title)}
-              className="mr-2"
-            />
-            {title}
-          </label>
+          <div 
+            key={index} 
+            className={`p-3 mb-2 rounded-lg cursor-pointer transition-colors duration-200 flex items-center ${
+              selectedTitle === title 
+                ? 'bg-blue-500 text-white' 
+                : 'bg-gray-100 hover:bg-gray-200'
+            }`}
+            onClick={() => handleTitleChange(title)}
+          >
+            <div className="mr-3 flex-shrink-0 w-6 h-6 flex items-center justify-center">
+              {selectedTitle === title && (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+              )}
+            </div>
+            <span>{title}</span>
+          </div>
         )) : null}
       </div>
 

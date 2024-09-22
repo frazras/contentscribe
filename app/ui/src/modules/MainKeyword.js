@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import ProgressBar from '../components/ProgressBar';
+import Tooltip from '../components/Tooltip';
 
 function MainKeyword({ nextStep, stepData, nextModule }) {
   const [inputKeyword, setInputKeyword] = useState('How to Make Money Blogging?');
   const [isInputKeywordValid, setIsInputKeywordValid] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSkipping, setIsSkipping] = useState(false);
   const [selectedCountry, setSelectedCountry] = useState('US');
 
   const handleInputKeywordChange = (event) => {
@@ -28,7 +30,7 @@ function MainKeyword({ nextStep, stepData, nextModule }) {
   };
 
   const handleSubmit = async (event) => {
-    event.preventDefault(); // Prevent default form submission behavior
+    event.preventDefault();
     if (!inputKeyword.trim()) {
       setIsInputKeywordValid(false);
       return;
@@ -36,6 +38,11 @@ function MainKeyword({ nextStep, stepData, nextModule }) {
     setIsSubmitting(true);
     const executionTime = calculateExecutionTime(inputKeyword);
     nextStep({ input_keyword: inputKeyword, country: selectedCountry }, executionTime);
+  };
+
+  const handleSkip = async () => {
+    setIsSkipping(true);
+    await nextStep({ input_keyword: inputKeyword, country: selectedCountry }, 5, false, 2);
   };
 
   return (
@@ -261,22 +268,58 @@ function MainKeyword({ nextStep, stepData, nextModule }) {
           </select>
         </div>
 
-        <div className="flex justify-end mt-4">
-          <button
-            type="submit"
-            className={`mt-4 px-4 py-2 ${isSubmitting ? 'bg-gray-500' : 'bg-blue-500 hover:bg-blue-700'} text-white rounded transition-colors`}
-            disabled={isSubmitting}
-          >
-           {isSubmitting ? (
-              <div className="flex items-center justify-center">
-                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        <div className="flex justify-between mt-4">
+          <div>
+            <button
+              type="button"
+              onClick={handleSkip}
+              className={`mt-4 px-4 py-2 ${isSkipping ? 'bg-gray-500' : 'bg-gray-300 hover:bg-gray-400'} text-gray-800 rounded transition-colors`}
+              disabled={isSkipping}
+            >
+              {isSkipping ? (
+                <div className="flex items-center justify-center">
+                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-gray-800" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Skipping...
+                </div>
+              ) : 'Skip Keyword Research'}
+            </button>
+            <Tooltip content="Skip keyword research is faster but reduces the specificity and context gotten by adding keywords">
+              <p className="text-xs text-gray-500 mt-4 flex items-center">
+                Takes ~5 seconds
+                <svg className="w-4 h-4 ml-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                 </svg>
-                Processing...
-              </div>
-            ) : nextModule.buttonLabel}
-          </button>
+              </p>
+            </Tooltip>
+          </div>
+          <div className="ml-4">
+            <button
+              type="submit"
+              className={`mt-4 px-4 py-2 ${isSubmitting ? 'bg-gray-500' : 'bg-blue-500 hover:bg-blue-700'} text-white rounded transition-colors`}
+              disabled={isSubmitting}
+            >
+             {isSubmitting ? (
+                <div className="flex items-center justify-center">
+                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Processing...
+                </div>
+              ) : nextModule.buttonLabel}
+            </button>
+            <Tooltip content="Keyword research takes long to find all related keywords. Shorter time for longtail keywords, longer time for broader keywords.">
+              <p className="text-xs text-gray-500 mt-4 flex items-center">
+                Up to 2 minutes
+                <svg className="w-4 h-4 ml-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                </svg>
+              </p>
+            </Tooltip>
+          </div>
         </div>
       </form>
       {isSubmitting && (
