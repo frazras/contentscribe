@@ -89,7 +89,8 @@ async def generate_title(request: Request):
     try:
         tavily_response = tavily.search(query=input_keyword, search_depth="advanced")
     except requests.exceptions.HTTPError as e:
-        raise HTTPException(status_code=500, detail=f"Failed to fetch data from Tavily: {e.response.text}")
+        #raise HTTPException(status_code=500, detail=f"Failed to fetch data from Tavily: {e.response.text}")
+        print(f"Failed to fetch data from Tavily: {e.response.text}")
     
     context = tavily_response['results']
 
